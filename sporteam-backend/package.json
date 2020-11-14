@@ -14,14 +14,16 @@
     "author": "Roman Dono Perez",
     "license": "MIT",
     "dependencies": {
-        "bcrypt-nodejs": "0.0.3",
+        "bcrypt": "^5.0.0",
         "body-parser": "^1.19.0",
         "connect-multiparty": "^2.2.0",
         "express": "^4.17.1",
         "jwt-simple": "^0.5.6",
         "moment": "^2.29.1",
         "mongoose": "^5.10.11",
-        "properties-reader": "^2.1.1"
+        "mongoose-unique-validator": "^2.0.3",
+        "properties-reader": "^2.1.1",
+        "underscore": "^1.11.0"
     },
     "devDependencies": {
         "nodemon": "^2.0.6"

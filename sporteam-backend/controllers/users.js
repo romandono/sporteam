@@ -1,10 +1,11 @@
 'use strict'
 
 //modules
-var bcrypt = require('bcrypt-nodejs');
+const bcrypt = require('bcrypt');
+const _ = require('underscore');
 
 //modelos
-var User = require('../models/user');
+const User = require('../models/user');
 
 //acciones
 function pruebas(req, res) {
@@ -14,55 +15,36 @@ function pruebas(req, res) {
 }
 
 function saveUser(req, res) {
-    var user = new User();
-
     // Recoger parámetros petición
     var params = req.body;
 
-    if (params.password && params.nombre && params.apellido1 && params.apellido2 && params.email && params.role) {
-        // Asignar valores al objeto usuario
-        user.nombre = params.nombre;
-        user.apellido1 = params.apellido1;
-        user.apellido2 = params.apellido2;
-        user.email = params.email;
-        user.image = null;
-        user.role = params.role;
+    // Asignar valores al objeto usuario
 
-        User.findOne({ email: user.email.toLowerCase() }, (err, issetUser) => {
-            if (err) {
-                res.status(500).send({ message: 'Error al comprobar el usuario' });
-            } else {
-                if (!issetUser) {
-                    // Cifrar contraseña
-                    bcrypt.hash(params.password, null, null, (err, hash) => {
-                        user.password = hash;
+    let usuario = new User({
+        nombre: params.nombre,
+        apellido1: params.apellido1,
+        apellido2: params.apellido2,
+        email: params.email,
+        image: null,
+        password: bcrypt.hashSync(params.password, 10),
+        role: params.role
+    });
 
-                        // Guardar usuario
-                        user.save((err, userStored) => {
-                            if (err) {
-                                res.status(500).send({
-                                    message: 'Error al guardar el usuario'
-                                });
-                            } else {
-                                if (!userStored) {
-                                    res.status(404).send({ message: 'No se ha registrado el usuario' });
-                                } else {
-                                    res.status(200).send({ user: userStored });
-                                }
-                            }
-                        });
-                    });
-                } else {
-                    res.status(200).send({ message: 'El usuario ya existe en la BD' });
-                }
-            }
-        });
+    usuario.save((err, usuarioDB) => {
 
-    } else {
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            });
+        }
+
         res.status(200).send({
-            message: 'Introduce los datos correctamente para registrar al usuario'
-        });
-    }
+            ok: true,
+            usuario: usuarioDB
+        })
+    });
+
 }
 
 function login(req, res) {
@@ -71,8 +53,97 @@ function login(req, res) {
     });
 }
 
+function updateUser(req, res) {
+
+    let id = req.params.id;
+    //Método pick selelcciona los atributes que si se pueden actualizar, el resto los ignora
+    let body = _.pick(req.body, ['nombre', 'apellido1', 'apellido2', 'email', 'image', 'role', 'estado']);
+
+    User.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, usuarioDB) => {
+
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            });
+        }
+
+        res.status(200).send({
+            ok: true,
+            usuario: usuarioDB
+        });
+    });
+}
+
+function getUsuarios(req, res) {
+
+    let desde = req.query.desde || 0;
+    desde = Number(desde);
+
+    let limite = req.query.limite || 5;
+    limite = Number(limite);
+
+    User.find({ estado: true })
+        .skip(desde)
+        .limit(limite)
+        .exec((err, usuarios) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    err
+                });
+            }
+
+            User.count({}, (err, total) => {
+                res.status(200).send({
+                    ok: true,
+                    usuarios,
+                    total: total
+                });
+            })
+
+        });
+}
+
+//No borra al usuario de la BD, solo le cambia el estado(desactivado)
+function deleteUser(req, res) {
+
+    let id = req.params.id;
+
+    let cambiaEstado = {
+        estado: false
+    };
+
+    User.findByIdAndUpdate(id, cambiaEstado, { new: true }, (err, usuarioBorrado) => {
+
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            });
+        }
+
+        if (!usuarioBorrado) {
+            return res.status(400).json({
+                ok: false,
+                err: {
+                    message: 'El usuario no existe'
+                }
+            });
+        }
+
+        res.status(200).send({
+            ok: true,
+            usuario: usuarioBorrado
+        });
+    });
+}
+
 module.exports = {
     pruebas,
     saveUser,
-    login
+    login,
+    updateUser,
+    getUsuarios,
+    deleteUser
 }
