@@ -2,7 +2,7 @@
 
 var mongoose = require('mongoose');
 var app = require('./app');
-var port = process.env.PORT || 3789;
+var port = process.env.PORT;
 
 mongoose.Promise = global.Promise;
 mongoose.connect('mongodb+srv://sporteam-01112020:EX39McyB@cluster0.lokgx.mongodb.net/sporteam?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true })

@@ -47,12 +47,6 @@ function saveUser(req, res) {
 
 }
 
-function login(req, res) {
-    res.status(200).send({
-        message: 'Método del login'
-    });
-}
-
 function updateUser(req, res) {
 
     let id = req.params.id;
@@ -142,7 +136,6 @@ function deleteUser(req, res) {
 module.exports = {
     pruebas,
     saveUser,
-    login,
     updateUser,
     getUsuarios,
     deleteUser
