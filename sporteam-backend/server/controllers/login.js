@@ -116,7 +116,7 @@ async function loginGoogle(req, res) {
             usuario.apellido1 = googleUser.nombre.split(' ')[1];
             usuario.apellido2 = googleUser.nombre.split(' ')[2];
             usuario.email = googleUser.email;
-            usuario.image = googleUser.image;
+            usuario.image = null;
             usuario.google = true;
             // Da igual la contraseña en el login de google
             usuario.password = ':)';

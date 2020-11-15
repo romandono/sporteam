@@ -3,6 +3,9 @@
 //modules
 const bcrypt = require('bcrypt');
 const _ = require('underscore');
+const fs = require('fs');
+const path = require('path');
+const https = require('https');
 
 //modelos
 const User = require('../models/user');
@@ -133,10 +136,47 @@ function deleteUser(req, res) {
     });
 }
 
+function getUserImage(req, res) {
+
+    let id = req.params.id;
+
+    User.findById(id, (err, usuarioDB) => {
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            });
+        }
+
+        if (!usuarioDB) {
+            return res.status(400).json({
+                ok: false,
+                err: {
+                    message: 'El usuario no existe'
+                }
+            });
+        }
+
+        let pathImage = path.resolve(__dirname, `../../uploads/usuarios/${usuarioDB.image}`);
+        if (usuarioDB.image === null || usuarioDB.image.substring(0, 5) === 'https') {
+            let noImage = path.resolve(__dirname, `../assets/no-image.jpg`);
+            res.sendFile(noImage);
+        } else {
+            if (fs.existsSync(pathImage)) {
+                res.sendFile(pathImage);
+            } else {
+                let noImage = path.resolve(__dirname, `../assets/no-image.jpg`);
+                res.sendFile(noImage);
+            }
+        }
+    });
+}
+
 module.exports = {
     pruebas,
     saveUser,
     updateUser,
     getUsuarios,
-    deleteUser
+    deleteUser,
+    getUserImage
 }
