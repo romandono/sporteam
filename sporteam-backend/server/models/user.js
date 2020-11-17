@@ -52,9 +52,19 @@ var UserSchema = Schema({
     google: {
         type: Boolean,
         default: false
+    },
+    estadoDeportivo: {
+        type: String,
+        required: [false]
+    },
+    zona: {
+        type: [Schema.Types.ObjectId],
+        ref: 'Zona',
+        required: [true, 'La zona es necesaria']
     }
 }, userOptions);
 
+// Método para no mostrar la password en la response
 UserSchema.methods.toJSON = function() {
 
     let user = this;
@@ -64,6 +74,7 @@ UserSchema.methods.toJSON = function() {
     return userObject;
 }
 
+// Muestra mensaje en la validación de unique
 UserSchema.plugin(uniqueValidator, { message: '{PATH} debe de ser único' });
 
 module.exports = mongoose.model('User', UserSchema);

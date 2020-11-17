@@ -1,16 +1,18 @@
 'use strict'
 require('./config/config');
 
-var express = require('express');
-var bodyParser = require('body-parser');
+const express = require('express');
+const bodyParser = require('body-parser');
 const path = require('path');
 
-var app = express();
+const app = express();
 
 // cargar rutas
 const user_routes = require('./routes/users');
 const login_routes = require('./routes/login');
 const upload_routes = require('./routes/upload');
+const jugadores_routes = require('./routes/jugador');
+const entrenadores_routes = require('./routes/entrenador');
 
 // middlewares de bodyparser
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -26,9 +28,7 @@ app.use(express.static(path.resolve(__dirname, '../public')));
 app.use('/api', user_routes);
 app.use('/api', login_routes);
 app.use('/api', upload_routes);
-
-app.get('/probando', (req, res) => {
-    res.status(200).send({ message: 'Este es el método probando' });
-});
+app.use('/api', jugadores_routes);
+app.use('/api', entrenadores_routes);
 
 module.exports = app;

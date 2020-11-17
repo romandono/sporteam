@@ -5,7 +5,6 @@ const bcrypt = require('bcrypt');
 const _ = require('underscore');
 const fs = require('fs');
 const path = require('path');
-const https = require('https');
 
 //modelos
 const User = require('../models/user');
@@ -77,7 +76,7 @@ function getUsuarios(req, res) {
     let desde = req.query.desde || 0;
     desde = Number(desde);
 
-    let limite = req.query.limite || 5;
+    let limite = req.query.limite || 50;
     limite = Number(limite);
 
     User.find({ estado: true })

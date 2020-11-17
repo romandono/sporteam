@@ -4,12 +4,19 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 const UserSchema = require('./user');
 
-var EntrenadorSchema = UserSchema.discriminator(new Schema({
-    nombreDeportivo: String,
-    entrenadorPorteros: Boolean,
-    titulacion: [String],
-    telefono: Number,
-    estado: String
+UserSchema.discriminator('Entrenador', Schema({
+    nombreDeportivo: {
+        type: String
+    },
+    entrenadorPorteros: {
+        type: Boolean
+    },
+    titulacion: {
+        type: [String]
+    },
+    telefono: {
+        type: Number
+    }
 }));
 
-module.exports = mongoose.model('Entrenador', EntrenadorSchema);
+module.exports = mongoose.model('Entrenador');
