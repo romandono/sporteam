@@ -1,15 +1,15 @@
 'use strict'
 
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
+const mongoose = require('mongoose');
+const Schema = mongoose.Schema;
+const UserSchema = require('./user');
 
-var EntrenadorSchema = Schema({
+var EntrenadorSchema = UserSchema.discriminator(new Schema({
     nombreDeportivo: String,
     entrenadorPorteros: Boolean,
     titulacion: [String],
     telefono: Number,
-    estado: String,
-    user: { type: Schema.ObjectId, ref: 'User' }
-});
+    estado: String
+}));
 
 module.exports = mongoose.model('Entrenador', EntrenadorSchema);

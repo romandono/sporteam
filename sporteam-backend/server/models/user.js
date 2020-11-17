@@ -9,6 +9,11 @@ let rolesValidos = {
 }
 var Schema = mongoose.Schema;
 
+const userOptions = {
+    discriminatorKey: 'usertype',
+    collection: 'users'
+};
+
 var UserSchema = Schema({
     nombre: {
         type: String,
@@ -48,7 +53,7 @@ var UserSchema = Schema({
         type: Boolean,
         default: false
     }
-});
+}, userOptions);
 
 UserSchema.methods.toJSON = function() {
 
