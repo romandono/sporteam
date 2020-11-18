@@ -6,7 +6,7 @@ const client = new OAuth2Client(process.env.CLIENT_ID);
 
 const User = require('../models/user');
 
-function login(req, res) {
+let login = (req, res) => {
 
     let body = req.body;
 
@@ -52,7 +52,7 @@ function login(req, res) {
 }
 
 // Configuraciones de Google
-async function verify(token) {
+let verify = async(token) => {
     const ticket = await client.verifyIdToken({
         idToken: token,
         audience: process.env.CLIENT_ID, // Specify the CLIENT_ID of the app that accesses the backend
@@ -69,7 +69,7 @@ async function verify(token) {
     }
 }
 
-async function loginGoogle(req, res) {
+let loginGoogle = async(req, res) => {
 
     let token = req.body.idtoken;
 

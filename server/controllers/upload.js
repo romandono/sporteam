@@ -1,11 +1,10 @@
 const fileUpload = require('express-fileupload');
-
-const User = require('../models/user');
-
 const fs = require('fs');
 const path = require('path');
 
-function uploadFile(req, res) {
+const User = require('../models/user');
+
+let uploadFile = (req, res) => {
 
     let id = req.params.id;
 
@@ -53,7 +52,7 @@ function uploadFile(req, res) {
 
 }
 
-function imagenUsuario(id, res, nombreArchivo) {
+let imagenUsuario = (id, res, nombreArchivo) => {
 
     User.findById(id, (err, usuarioDB) => {
         if (err) {
@@ -91,7 +90,7 @@ function imagenUsuario(id, res, nombreArchivo) {
     });
 }
 
-function borrarArchivo(nombreImagen) {
+let borrarArchivo = (nombreImagen) => {
 
     let pathUrlImage = path.resolve(__dirname, `../../uploads/usuarios/${nombreImagen}`);
     // Si ya existe la misma imagen la borramos del FileSystem

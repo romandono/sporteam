@@ -5,7 +5,7 @@ var app = require('./server/app');
 var port = process.env.PORT;
 
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb+srv://sporteam-01112020:EX39McyB@cluster0.lokgx.mongodb.net/sporteam?retryWrites=true&w=majority', { useNewUrlParser: true, useUnifiedTopology: true })
+mongoose.connect('mongodb+srv://sporteam-01112020:EX39McyB@cluster0.lokgx.mongodb.net/sporteam?retryWrites=true&w=majority', { useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true })
     .then(() => {
         console.log('La conexión a la base de datos sporteam se ha realizado correctamente...');
 

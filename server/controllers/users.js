@@ -1,22 +1,20 @@
-'use strict'
-
 //modules
 const bcrypt = require('bcrypt');
 const _ = require('underscore');
 const fs = require('fs');
 const path = require('path');
 
-//modelos
+// Modelo 
 const User = require('../models/user');
 
 //acciones
-function pruebas(req, res) {
+let pruebas = (req, res) => {
     res.status(200).send({
         message: 'Probando el controlador de usuarios y la acción pruebas'
     });
 }
 
-function saveUser(req, res) {
+let saveUser = (req, res) => {
     // Recoger parámetros petición
     var params = req.body;
 
@@ -49,7 +47,7 @@ function saveUser(req, res) {
 
 }
 
-function updateUser(req, res) {
+let updateUser = (req, res) => {
 
     let id = req.params.id;
     //Método pick selelcciona los atributes que si se pueden actualizar, el resto los ignora
@@ -71,7 +69,7 @@ function updateUser(req, res) {
     });
 }
 
-function getUsuarios(req, res) {
+let getUsuarios = (req, res) => {
 
     let desde = req.query.desde || 0;
     desde = Number(desde);
@@ -102,7 +100,7 @@ function getUsuarios(req, res) {
 }
 
 //No borra al usuario de la BD, solo le cambia el estado(desactivado)
-function deleteUser(req, res) {
+let deleteUser = (req, res) => {
 
     let id = req.params.id;
 
@@ -135,7 +133,7 @@ function deleteUser(req, res) {
     });
 }
 
-function getUserImage(req, res) {
+let getUserImage = (req, res) => {
 
     let id = req.params.id;
 

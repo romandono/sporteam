@@ -1,9 +1,9 @@
 const bcrypt = require('bcrypt');
 
-// Importamos el UserSchema para las consultas sobre usuarios de tipo jugador
+// Modelo 
 const EntrenadorSchema = require('../models/entrenador');
 
-function saveEntrenador(req, res) {
+let saveEntrenador = (req, res) => {
 
     let params = req.body;
 
@@ -39,7 +39,7 @@ function saveEntrenador(req, res) {
     });
 }
 
-function getEntrenadores(req, res) {
+let getEntrenadores = (req, res) => {
 
     res.status(200).send({
         ok: true
