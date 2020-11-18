@@ -5,3 +5,7 @@ workflows:
   node-tests:
     jobs:
       - node/test
+general:
+  branches:
+      only:
+        - pruebas-roman
