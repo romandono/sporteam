@@ -1,20 +1,17 @@
-const bcrypt = require('bcrypt');
-
 // Modelo 
 const JugadorSchema = require('../models/jugador');
+
+// Utils usuario
+const { partesComunesUsuario } = require('./utilsUsuario');
 
 let saveJugador = (req, res) => {
 
     let params = req.body;
 
+    let partesComunes = partesComunesUsuario(params)
+
     let jugador = new JugadorSchema({
-        nombre: params.nombre,
-        apellido1: params.apellido1,
-        apellido2: params.apellido2,
-        email: params.email,
-        password: bcrypt.hashSync(params.password, 10),
-        role: params.role,
-        image: null,
+        ...partesComunes,
         estadoDeportivo: params.estadoDeportivo,
         zona: params.zona,
         nombreDeportivo: params.nombreDeportivo,

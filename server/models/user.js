@@ -60,7 +60,7 @@ var UserSchema = Schema({
     zona: {
         type: [Schema.Types.ObjectId],
         ref: 'Zona',
-        required: [true, 'La zona es necesaria']
+        required: [false, 'La zona es necesaria']
     }
 }, userOptions);
 

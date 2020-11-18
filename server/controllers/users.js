@@ -1,11 +1,12 @@
-//modules
-const bcrypt = require('bcrypt');
 const _ = require('underscore');
 const fs = require('fs');
 const path = require('path');
 
 // Modelo 
 const User = require('../models/user');
+
+// Utils usuario
+const { partesComunesUsuario } = require('./utilsUsuario');
 
 //acciones
 let pruebas = (req, res) => {
@@ -15,20 +16,14 @@ let pruebas = (req, res) => {
 }
 
 let saveUser = (req, res) => {
+
     // Recoger parámetros petición
-    var params = req.body;
+    let params = req.body;
+
+    let partesComunes = partesComunesUsuario(params)
 
     // Asignar valores al objeto usuario
-
-    let usuario = new User({
-        nombre: params.nombre,
-        apellido1: params.apellido1,
-        apellido2: params.apellido2,
-        email: params.email,
-        image: null,
-        password: bcrypt.hashSync(params.password, 10),
-        role: params.role
-    });
+    let usuario = new User(partesComunes);
 
     usuario.save((err, usuarioDB) => {
 

@@ -5,7 +5,7 @@ const app = express.Router();
 
 const { verificarToken } = require('../middlewares/authentication');
 
-app.post('/jugador', verificarToken, JugadorController.saveJugador);
+app.post('/jugador', JugadorController.saveJugador);
 app.get('/jugadores', verificarToken, JugadorController.getJugadores);
 
 module.exports = app;

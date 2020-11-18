@@ -10,7 +10,7 @@ UserSchema.discriminator('Jugador', Schema({
         required: [false]
     },
     fechaNacimiento: {
-        type: Date,
+        type: String,
         required: [true, 'La fecha de nacimiento es necesaria']
     },
     lateralidad: {
