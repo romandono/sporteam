@@ -1,8 +1,8 @@
 // Modelo 
-const JugadorSchema = require('../models/jugador');
+const JugadorSchema = require('../../models/jugador');
 
 // Utils usuario
-const { partesComunesUsuario } = require('./utilsUsuario');
+const { partesComunesUsuario } = require('./utils-users-controller');
 
 let saveJugador = (req, res) => {
 
@@ -13,7 +13,6 @@ let saveJugador = (req, res) => {
     let jugador = new JugadorSchema({
         ...partesComunes,
         estadoDeportivo: params.estadoDeportivo,
-        zona: params.zona,
         nombreDeportivo: params.nombreDeportivo,
         fechaNacimiento: Date.parse(params.fechaNacimiento),
         lateralidad: params.lateralidad,

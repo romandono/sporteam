@@ -1,8 +1,8 @@
 // Modelo 
-const EntrenadorSchema = require('../models/entrenador');
+const EntrenadorSchema = require('../../models/entrenador');
 
 // Utils usuario
-const { partesComunesUsuario } = require('./utilsUsuario');
+const { partesComunesUsuario } = require('./utils-users-controller');
 
 let saveEntrenador = (req, res) => {
 
@@ -13,7 +13,6 @@ let saveEntrenador = (req, res) => {
     let entrenador = new EntrenadorSchema({
         ...partesComunes,
         estadoDeportivo: params.estadoDeportivo,
-        zona: params.zona,
         nombreDeportivo: params.nombreDeportivo,
         entrenadorPorteros: params.entrenadorPorteros,
         titulacion: params.titulacion,

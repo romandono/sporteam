@@ -1,20 +1,19 @@
-'use strict'
-
-var mongoose = require('mongoose');
+const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
 
 let rolesValidos = {
     values: ['ADMIN_ROLE', 'USER_ROLE', 'JUGADOR_ROLE', 'ENTRENADOR_ROLE', 'CLUB_ROLE'],
     message: '{VALUE} no es un rol válido'
 }
-var Schema = mongoose.Schema;
+
+let Schema = mongoose.Schema;
 
 const userOptions = {
     discriminatorKey: 'usertype',
     collection: 'users'
 };
 
-var UserSchema = Schema({
+let UserSchema = Schema({
     nombre: {
         type: String,
         required: [true, 'El nombre es necesario']

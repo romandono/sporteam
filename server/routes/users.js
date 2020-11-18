@@ -1,7 +1,7 @@
 'use strict'
 
 var express = require('express');
-var UserController = require('../controllers/users');
+var UserController = require('../controllers/usuarios-controllers/users-controller');
 const { verificarToken, verificarAdmin_Rol, verificaTokenImage } = require('../middlewares/authentication');
 
 var api = express.Router();

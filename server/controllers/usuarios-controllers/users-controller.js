@@ -3,10 +3,10 @@ const fs = require('fs');
 const path = require('path');
 
 // Modelo 
-const User = require('../models/user');
+const User = require('../../models/user');
 
 // Utils usuario
-const { partesComunesUsuario } = require('./utilsUsuario');
+const { partesComunesUsuario } = require('./utils-users-controller');
 
 //acciones
 let pruebas = (req, res) => {
@@ -20,10 +20,8 @@ let saveUser = (req, res) => {
     // Recoger parámetros petición
     let params = req.body;
 
-    let partesComunes = partesComunesUsuario(params)
-
     // Asignar valores al objeto usuario
-    let usuario = new User(partesComunes);
+    let usuario = new User(partesComunesUsuario(params));
 
     usuario.save((err, usuarioDB) => {
 
