@@ -1,8 +1,11 @@
 // Modules
 const bcrypt = require('bcrypt');
 
-// Metodo que recibe los parámetros de la request y los mapea en un modelo user/jugador/entrenador
-let partesComunesUsuario = (params) => {
+/**
+ * Devuelve un objeto con las propiedades comunes de los modelos usuario/jugador/entrenador
+ * @param {*} params parámetros recibidos por request
+ */
+let getPropiedadesComunesUsuario = (params) => {
     return {
         nombre: params.nombre,
         apellido1: params.apellido1,
@@ -18,6 +21,18 @@ let partesComunesUsuario = (params) => {
     }
 }
 
+/**
+ * Método que devuelve los campos que son mostrados por la consulta GET
+ */
+let getPropiedadesAMostrarUsuario = () => ['nombre',
+    'apellido1',
+    'apellido2',
+    'email',
+    'estadoDeportivo',
+    'zona'
+]
+
 module.exports = {
-    partesComunesUsuario
+    getPropiedadesComunesUsuario,
+    getPropiedadesAMostrarUsuario
 }

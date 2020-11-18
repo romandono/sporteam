@@ -2,7 +2,7 @@ const fileUpload = require('express-fileupload');
 const fs = require('fs');
 const path = require('path');
 
-const User = require('../models/user');
+const User = require('../models/user-models/user');
 
 let uploadFile = (req, res) => {
 

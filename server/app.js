@@ -1,4 +1,3 @@
-'use strict'
 require('./config/config');
 
 const express = require('express');
@@ -8,11 +7,11 @@ const path = require('path');
 const app = express();
 
 // cargar rutas
-const user_routes = require('./routes/users');
+const user_routes = require('./routes/user-routes/usuario-route');
+const jugadores_routes = require('./routes/user-routes/jugador-route');
+const entrenadores_routes = require('./routes/user-routes/entrenador-route');
 const login_routes = require('./routes/login');
 const upload_routes = require('./routes/upload');
-const jugadores_routes = require('./routes/jugador');
-const entrenadores_routes = require('./routes/entrenador');
 
 // middlewares de bodyparser
 app.use(bodyParser.urlencoded({ extended: false }));

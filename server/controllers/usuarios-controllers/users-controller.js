@@ -1,27 +1,91 @@
+/**
+ * Imports Módulos 
+ */
 const _ = require('underscore');
 const fs = require('fs');
 const path = require('path');
 
-// Modelo 
-const User = require('../../models/user');
+/**
+ * Imports de modelos
+ */
+const User = require('../../models/user-models/user');
 
-// Utils usuario
-const { partesComunesUsuario } = require('./utils-users-controller');
+/**
+ * Utilidades para homogenizar y reducir código
+ */
+const { getPropiedadesAMostrarUsuario, getPropiedadesComunesUsuario } = require('./utils-users-controller');
 
-//acciones
-let pruebas = (req, res) => {
-    res.status(200).send({
-        message: 'Probando el controlador de usuarios y la acción pruebas'
+// Constante que almacena os campos que se mostrarán nas consultas.
+const camposAMostrar = getPropiedadesAMostrarUsuario();
+
+/**
+ * Devuelve un listado de usuarios paginados
+ * @param {*} req 
+ * @param {*} res 
+ */
+let getUsuarios = (req, res) => {
+
+    let desde = req.query.desde || 0;
+    let limite = req.query.limite || 20;
+
+    User.find({ estado: true }, camposAMostrar)
+        .skip(Number(desde))
+        .limit(Number(limite))
+        .exec((err, usuarios) => {
+
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    message: 'No se pudo recuperar ningún usuario.'
+                });
+            }
+
+            User.countDocuments({}, (err, total) => {
+                res.status(200).send({
+                    ok: true,
+                    usuarios,
+                    total: total
+                });
+            })
+        });
+}
+
+/**
+ * Devuelve un usuario a partír de un id
+ * @param {*} req 
+ * @param {*} res 
+ */
+let getUsuario = (req, res) => {
+
+    let id = req.params.id;
+
+    User.findById(id, camposAMostrar, (err, usuario) => {
+
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                message: 'No se pudo recuperar ningún usuario.'
+            });
+        }
+
+        res.status(200).send({
+            ok: true,
+            usuario
+        });
     });
 }
 
+/**
+ * Almacena un usuario
+ * @param {*} req 
+ * @param {*} res 
+ */
 let saveUser = (req, res) => {
 
-    // Recoger parámetros petición
     let params = req.body;
+    let camposComunesUsuario = getPropiedadesComunesUsuario(params)
 
-    // Asignar valores al objeto usuario
-    let usuario = new User(partesComunesUsuario(params));
+    let usuario = new User(camposComunesUsuario);
 
     usuario.save((err, usuarioDB) => {
 
@@ -37,7 +101,6 @@ let saveUser = (req, res) => {
             usuario: usuarioDB
         })
     });
-
 }
 
 let updateUser = (req, res) => {
@@ -60,36 +123,6 @@ let updateUser = (req, res) => {
             usuario: usuarioDB
         });
     });
-}
-
-let getUsuarios = (req, res) => {
-
-    let desde = req.query.desde || 0;
-    desde = Number(desde);
-
-    let limite = req.query.limite || 50;
-    limite = Number(limite);
-
-    User.find({ estado: true })
-        .skip(desde)
-        .limit(limite)
-        .exec((err, usuarios) => {
-            if (err) {
-                return res.status(400).json({
-                    ok: false,
-                    err
-                });
-            }
-
-            User.count({}, (err, total) => {
-                res.status(200).send({
-                    ok: true,
-                    usuarios,
-                    total: total
-                });
-            })
-
-        });
 }
 
 //No borra al usuario de la BD, solo le cambia el estado(desactivado)
@@ -163,10 +196,10 @@ let getUserImage = (req, res) => {
 }
 
 module.exports = {
-    pruebas,
+    getUsuarios,
+    getUsuario,
     saveUser,
     updateUser,
-    getUsuarios,
     deleteUser,
     getUserImage
 }

@@ -1,17 +1,85 @@
-// Modelo 
-const EntrenadorSchema = require('../../models/entrenador');
+/**
+ * Imports de modelos
+ */
+const Entrenador = require('../../models/user-models/entrenador');
 
-// Utils usuario
-const { partesComunesUsuario } = require('./utils-users-controller');
+/**
+ * Utilidades para homogenizar y reducir código
+ */
+const { getPropiedadesAMostrarUsuario, getPropiedadesComunesUsuario } = require('./utils-users-controller');
 
+// Constante que almacena os campos que se mostrarán nas consultas.
+const camposAMostrar = getPropiedadesAMostrarUsuario();
+
+/**
+ * Devuelve un listado de entrenadores paginados
+ * @param {*} req 
+ * @param {*} res 
+ */
+let getEntrenadores = (req, res) => {
+
+    let desde = req.query.desde || 0;
+    let limite = req.query.limite || 20;
+
+    Entrenador.find({ estado: true }, camposAMostrar)
+        .skip(Number(desde))
+        .limit(Number(limite))
+        .exec((err, entrenadores) => {
+
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    message: 'No se pudo recuperar ningún entrenador.'
+                });
+            }
+
+            Entrenador.countDocuments({}, (err, total) => {
+                res.status(200).send({
+                    ok: true,
+                    entrenadores,
+                    total: total
+                });
+            })
+        });
+}
+
+/**
+ * Devuelve un entrenador a partír de un id
+ * @param {*} req 
+ * @param {*} res 
+ */
+let getEntrenador = (req, res) => {
+
+    let id = req.params.id;
+
+    Entrenador.findById(id, camposAMostrar, (err, entrenador) => {
+
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                message: 'No se pudo recuperar ningún entrenador.'
+            });
+        }
+
+        res.status(200).send({
+            ok: true,
+            entrenador
+        });
+    });
+}
+
+/**
+ * Almacena un entrenador
+ * @param {*} req 
+ * @param {*} res 
+ */
 let saveEntrenador = (req, res) => {
 
     let params = req.body;
-
-    let partesComunes = partesComunesUsuario(params)
+    let camposComunesUsuario = getPropiedadesComunesUsuario(params)
 
     let entrenador = new EntrenadorSchema({
-        ...partesComunes,
+        ...camposComunesUsuario,
         estadoDeportivo: params.estadoDeportivo,
         nombreDeportivo: params.nombreDeportivo,
         entrenadorPorteros: params.entrenadorPorteros,
@@ -35,14 +103,8 @@ let saveEntrenador = (req, res) => {
     });
 }
 
-let getEntrenadores = (req, res) => {
-
-    res.status(200).send({
-        ok: true
-    });
-}
-
 module.exports = {
-    saveEntrenador,
-    getEntrenadores
+    getEntrenadores,
+    getEntrenador,
+    saveEntrenador
 }

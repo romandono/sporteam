@@ -54,7 +54,7 @@ let UserSchema = Schema({
     },
     estadoDeportivo: {
         type: String,
-        required: [false]
+        required: false
     },
     zona: {
         type: [Schema.Types.ObjectId],
