@@ -2,11 +2,12 @@
  * Imports de modelos
  */
 const Jugador = require('../../models/user-models/jugador');
+const _ = require('underscore');
 
 /**
  * Utilidades para homogenizar y reducir código
  */
-const { getPropiedadesAMostrarUsuario, getPropiedadesComunesUsuario } = require('./utils-users-controller');
+const { getPropiedadesAMostrarUsuario, getPropiedadesComunesUsuario, camposToUpdate } = require('./utils-users-controller');
 
 // Constante que almacena os campos que se mostrarán nas consultas.
 const camposAMostrar = getPropiedadesAMostrarUsuario();
@@ -76,7 +77,7 @@ let getJugador = (req, res) => {
 let saveJugador = (req, res) => {
 
     let params = req.body;
-    let camposComunesUsuario = getPropiedadesComunesUsuario(params)
+    let camposComunesUsuario = getPropiedadesComunesUsuario(params);
 
     let jugador = new Jugador({
         ...camposComunesUsuario,
@@ -105,8 +106,32 @@ let saveJugador = (req, res) => {
     });
 }
 
+let updateJugador = (req, res) => {
+
+    let id = req.params.id;
+    let camposActualizar = camposToUpdate().camposComunes.concat(camposToUpdate().camposJugador);
+
+    let body = _.pick(req.body, camposActualizar);
+
+    Jugador.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, jugadorDB) => {
+
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            });
+        }
+
+        res.status(200).send({
+            ok: true,
+            jugador: jugadorDB
+        });
+    });
+}
+
 module.exports = {
     getJugadores,
     getJugador,
-    saveJugador
+    saveJugador,
+    updateJugador
 }

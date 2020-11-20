@@ -3,12 +3,11 @@ const JugadorController = require('../../controllers/usuarios-controllers/jugado
 
 const app = express.Router();
 
-const { verificarToken } = require('../../middlewares/authentication');
+const { verificarToken, verificarJugador_Rol } = require('../../middlewares/authentication');
 
-app.get('/jugadores', JugadorController.getJugadores);
-app.get('/jugador/:id', JugadorController.getJugador);
-
+app.get('/jugadores', [verificarToken, verificarJugador_Rol], JugadorController.getJugadores);
+app.get('/jugador/:id', [verificarToken, verificarJugador_Rol], JugadorController.getJugador);
 app.post('/jugador', JugadorController.saveJugador);
-
+app.put('/jugador/:id', [verificarToken, verificarJugador_Rol], JugadorController.updateJugador);
 
 module.exports = app;

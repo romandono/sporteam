@@ -32,7 +32,20 @@ let getPropiedadesAMostrarUsuario = () => ['nombre',
     'zona'
 ]
 
+/**
+ * Método que devuelve los campos a actualizar de los usuarios PUT
+ */
+
+let camposToUpdate = () => {
+    return {
+        camposComunes: ['nombre', 'apellido1', 'apellido2', 'email', 'image', 'role', 'estado'],
+        camposJugador: ['estadoDeportivo', 'nombreDeportivo', 'fechaNacimiento', 'lateralidad', 'demarcacion', 'altura', 'peso'],
+        camposEntrenador: ['estadoDeportivo', 'nombreDeportivo', 'entrenadorPorteros', 'titulacion', 'telefono']
+    }
+}
+
 module.exports = {
     getPropiedadesComunesUsuario,
-    getPropiedadesAMostrarUsuario
+    getPropiedadesAMostrarUsuario,
+    camposToUpdate
 }

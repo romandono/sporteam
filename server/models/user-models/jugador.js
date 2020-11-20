@@ -18,7 +18,7 @@ UserSchema.discriminator('Jugador', Schema({
         required: [true, 'La lateralidad es necesaria']
     },
     demarcacion: {
-        type: String,
+        type: [String],
         required: [true, 'La demarcación es necesaria']
     },
     altura: {

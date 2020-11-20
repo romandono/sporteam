@@ -46,6 +46,44 @@ let verificarAdmin_Rol = (req, res, next) => {
 };
 
 // =================
+// Verificar usuario jugador
+// =================
+let verificarJugador_Rol = (req, res, next) => {
+
+    let usuario = req.usuario;
+
+    if (usuario.role === 'JUGADOR_ROLE') {
+        next();
+    } else {
+        return res.json({
+            ok: false,
+            err: {
+                message: 'El usuario no es jugador'
+            }
+        });
+    }
+};
+
+// =================
+// Verificar usuario entrenador
+// =================
+let verificarEntrenador_Rol = (req, res, next) => {
+
+    let usuario = req.usuario;
+
+    if (usuario.role === 'ENTRENADOR_ROL') {
+        next();
+    } else {
+        return res.json({
+            ok: false,
+            err: {
+                message: 'El usuario no es entrenador'
+            }
+        });
+    }
+};
+
+// =================
 // Verificar Token imagen
 // =================
 let verificaTokenImage = (req, res, next) => {
@@ -72,5 +110,7 @@ let verificaTokenImage = (req, res, next) => {
 module.exports = {
     verificarToken,
     verificarAdmin_Rol,
+    verificarJugador_Rol,
+    verificarEntrenador_Rol,
     verificaTokenImage
 }

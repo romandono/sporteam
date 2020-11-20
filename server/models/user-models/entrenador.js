@@ -8,10 +8,11 @@ UserSchema.discriminator('Entrenador', Schema({
         type: String
     },
     entrenadorPorteros: {
-        type: Boolean
+        type: Boolean,
+        default: false
     },
     titulacion: {
-        type: String
+        type: [String]
     },
     telefono: {
         type: Number

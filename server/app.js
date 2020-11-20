@@ -12,6 +12,7 @@ const jugadores_routes = require('./routes/user-routes/jugador-route');
 const entrenadores_routes = require('./routes/user-routes/entrenador-route');
 const login_routes = require('./routes/login');
 const upload_routes = require('./routes/upload');
+const provincias = require('./routes/provincia');
 
 // middlewares de bodyparser
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -29,5 +30,6 @@ app.use('/api', login_routes);
 app.use('/api', upload_routes);
 app.use('/api', jugadores_routes);
 app.use('/api', entrenadores_routes);
+app.use('/api', provincias);
 
 module.exports = app;

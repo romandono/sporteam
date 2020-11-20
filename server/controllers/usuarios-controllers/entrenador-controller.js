@@ -6,7 +6,7 @@ const Entrenador = require('../../models/user-models/entrenador');
 /**
  * Utilidades para homogenizar y reducir código
  */
-const { getPropiedadesAMostrarUsuario, getPropiedadesComunesUsuario } = require('./utils-users-controller');
+const { getPropiedadesAMostrarUsuario, getPropiedadesComunesUsuario, camposToUpdate } = require('./utils-users-controller');
 
 // Constante que almacena os campos que se mostrarán nas consultas.
 const camposAMostrar = getPropiedadesAMostrarUsuario();
@@ -103,8 +103,32 @@ let saveEntrenador = (req, res) => {
     });
 }
 
+let updateEntrenador = (req, res) => {
+
+    let id = req.params.id;
+    let camposActualizar = camposToUpdate().camposComunes.concat(camposToUpdate().camposEntrenador);
+
+    let body = _.pick(req.body, camposActualizar);
+
+    Entrenador.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, entrenadorDB) => {
+
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            });
+        }
+
+        res.status(200).send({
+            ok: true,
+            entrenador: entrenadorDB
+        });
+    });
+}
+
 module.exports = {
     getEntrenadores,
     getEntrenador,
-    saveEntrenador
+    saveEntrenador,
+    updateEntrenador
 }

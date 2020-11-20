@@ -36,7 +36,7 @@ let getUsuarios = (req, res) => {
             if (err) {
                 return res.status(400).json({
                     ok: false,
-                    message: 'No se pudo recuperar ningún usuario.'
+                    message: 'No se pudo recuperar ningún usuario'
                 });
             }
 
