@@ -1,12 +1,15 @@
+const { response } = require('express');
 const fileUpload = require('express-fileupload');
 const fs = require('fs');
 const path = require('path');
 
 const User = require('../models/user-models/user');
+const Club = require('../models/club');
 
 let uploadFile = (req, res) => {
 
     let id = req.params.id;
+    let tipo = req.params.tipo;
 
     if (!req.files) {
         return res.status(400)
@@ -37,7 +40,7 @@ let uploadFile = (req, res) => {
     // Cambiar nombre al archivo
     let nombreArchivo = `${id}-${new Date().getMilliseconds()}.${extension}`;
 
-    archivo.mv(`uploads/usuarios/${nombreArchivo}`, (err) => {
+    archivo.mv(`uploads/${tipo}/${nombreArchivo}`, (err) => {
         if (err) {
             return res.status(500).send({
                 ok: false,
@@ -45,8 +48,16 @@ let uploadFile = (req, res) => {
             });
         }
 
-        // Imagen cargada, actualización imagen usuario
-        imagenUsuario(id, res, nombreArchivo);
+        // Imagen cargada, actualización imagen usuario o club
+        switch (tipo) {
+            case 'usuarios':
+                imagenUsuario(id, res, nombreArchivo);
+                break;
+            case 'clubs':
+                imagenClub(id, res, nombreArchivo);
+                break;
+        }
+
 
     });
 
@@ -90,9 +101,55 @@ let imagenUsuario = (id, res, nombreArchivo) => {
     });
 }
 
+let imagenClub = (id, res = response, nombreArchivo) => {
+    Club.findById(id, (err, clubBD) => {
+        if (err) {
+            // Borrar imagen existente en fileSystem
+            borrarArchivoClub(nombreArchivo);
+            return res.status(500).send({
+                ok: false,
+                err
+            });
+        }
+
+        if (!clubBD) {
+            // Borrar imagen existente en fileSystem
+            borrarArchivoClub(nombreArchivo);
+            return res.status(400).send({
+                ok: false,
+                err: {
+                    message: 'El club no existe'
+                }
+            });
+        }
+
+        // Borrar imagen existente en fileSystem
+        borrarArchivoClub(clubBD.image);
+
+        clubBD.image = nombreArchivo;
+
+        clubBD.save((err, clubGuardado) => {
+            res.status(200).send({
+                ok: true,
+                usuario: clubGuardado,
+                image: nombreArchivo
+            });
+        });
+    });
+}
+
 let borrarArchivo = (nombreImagen) => {
 
     let pathUrlImage = path.resolve(__dirname, `../../uploads/usuarios/${nombreImagen}`);
+    // Si ya existe la misma imagen la borramos del FileSystem
+    if (fs.existsSync(pathUrlImage)) {
+        fs.unlinkSync(pathUrlImage);
+    }
+}
+
+let borrarArchivoClub = (nombreImagen) => {
+
+    let pathUrlImage = path.resolve(__dirname, `../../uploads/clubs/${nombreImagen}`);
     // Si ya existe la misma imagen la borramos del FileSystem
     if (fs.existsSync(pathUrlImage)) {
         fs.unlinkSync(pathUrlImage);

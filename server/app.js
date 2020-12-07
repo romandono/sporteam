@@ -1,8 +1,9 @@
 require('./config/config');
-
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const cors = require('cors');
 
 const app = express();
 
@@ -12,7 +13,9 @@ const jugadores_routes = require('./routes/user-routes/jugador-route');
 const entrenadores_routes = require('./routes/user-routes/entrenador-route');
 const login_routes = require('./routes/login');
 const upload_routes = require('./routes/upload');
-const provincias = require('./routes/provincia');
+const provincias_routes = require('./routes/provincia');
+const clubs_routes = require('./routes/club');
+const zonas_routes = require('./routes/zona')
 
 // middlewares de bodyparser
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -23,6 +26,7 @@ app.use(bodyParser.json());
 app.use(express.static(path.resolve(__dirname, '../public')));
 
 // configurar cabeceras y cors
+app.use(cors());
 
 // rutas base
 app.use('/api', user_routes);
@@ -30,6 +34,8 @@ app.use('/api', login_routes);
 app.use('/api', upload_routes);
 app.use('/api', jugadores_routes);
 app.use('/api', entrenadores_routes);
-app.use('/api', provincias);
+app.use('/api', provincias_routes);
+app.use('/api', clubs_routes);
+app.use('/api', zonas_routes);
 
 module.exports = app;

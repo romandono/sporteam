@@ -14,7 +14,15 @@ api.put('/usuario/:id', UserController.updateUser);
 
 api.delete('/usuario/:id', UserController.deleteUser);
 
-api.get('/usuario/image/:id', UserController.getUserImage);
+api.get('/uploads/:tipo/:foto', UserController.getUserImage);
+
+api.get('/prueba', (req, res) => {
+
+    res.status(200).send({
+        ok: true,
+        message: 'Hola mundo'
+    })
+});
 
 
 module.exports = api;

@@ -8,6 +8,7 @@ const _ = require('underscore');
  * Utilidades para homogenizar y reducir código
  */
 const { getPropiedadesAMostrarUsuario, getPropiedadesComunesUsuario, camposToUpdate } = require('./utils-users-controller');
+const { response } = require('express');
 
 // Constante que almacena os campos que se mostrarán nas consultas.
 const camposAMostrar = getPropiedadesAMostrarUsuario();
@@ -20,9 +21,9 @@ const camposAMostrar = getPropiedadesAMostrarUsuario();
 let getJugadores = (req, res) => {
 
     let desde = req.query.desde || 0;
-    let limite = req.query.limite || 20;
+    let limite = req.query.limite || 5;
 
-    Jugador.find({ estado: true }, camposAMostrar)
+    Jugador.find()
         .skip(Number(desde))
         .limit(Number(limite))
         .exec((err, jugadores) => {
@@ -44,6 +45,28 @@ let getJugadores = (req, res) => {
         });
 }
 
+let getJugadoresBusqueda = async(req, res) => {
+
+    let termino = req.params.termino;
+    const regex = new RegExp(termino, 'i');
+
+    Jugador.find({ nombre: regex })
+        .exec((err, resultados) => {
+
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    message: 'No se pudo recuperar ningún jugador.'
+                });
+            }
+
+            res.status(200).send({
+                ok: true,
+                resultados
+            });
+        });
+}
+
 /**
  * Devuelve un jugador a partír de un id
  * @param {*} req 
@@ -53,7 +76,7 @@ let getJugador = (req, res) => {
 
     let id = req.params.id;
 
-    Jugador.findById(id, camposAMostrar, (err, jugador) => {
+    Jugador.findById(id, (err, jugador) => {
 
         if (err) {
             return res.status(400).json({
@@ -66,7 +89,39 @@ let getJugador = (req, res) => {
             ok: true,
             jugador
         });
+    }).populate({ path: 'club' }).populate({ path: 'zona' });
+}
+
+let getJugadoresPorZona = (req, res = response) => {
+
+    let idZona = req.params.idZona;
+
+    let desde = req.query.desde || 0;
+    let limite = req.query.limite || 5;
+
+    Jugador.find().populate({
+        path: 'zona',
+        match: { _id: { $eq: idZona } },
+        select: 'nombreZona'
+    }).skip(desde).limit(limite).exec((err, jugadores) => {
+        if (err) {
+            res.status(500).json({
+                ok: false,
+                err
+            })
+        }
+
+        jugadores = _.filter(jugadores, (jugador) => {
+            return jugador.zona !== null;
+        })
+
+        res.status(200).json({
+            ok: true,
+            jugadores
+        });
+
     });
+
 }
 
 /**
@@ -113,6 +168,17 @@ let updateJugador = (req, res) => {
 
     let body = _.pick(req.body, camposActualizar);
 
+    switch (body.role) {
+        case 'JUGADOR_ROLE':
+            body.usertype = 'Jugador';
+            break;
+        case 'ENTRENADOR_ROLE':
+            body.usertype = 'Entrenador';
+            break;
+        case 'USER_ROLE':
+            body.usertype = 'Usuario';
+            break;
+    }
     Jugador.findByIdAndUpdate(id, body, { new: true, runValidators: true }, (err, jugadorDB) => {
 
         if (err) {
@@ -133,5 +199,7 @@ module.exports = {
     getJugadores,
     getJugador,
     saveJugador,
-    updateJugador
+    updateJugador,
+    getJugadoresPorZona,
+    getJugadoresBusqueda
 }

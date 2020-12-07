@@ -18,13 +18,9 @@ let UserSchema = Schema({
         type: String,
         required: [true, 'El nombre es necesario']
     },
-    apellido1: {
+    apellidos: {
         type: String,
-        required: [true, 'El primer apellido es necesario']
-    },
-    apellido2: {
-        type: String,
-        required: [true, 'El segundo apellido es necesario']
+        required: [true, 'Los apellidos son necesarios']
     },
     email: {
         type: String,
@@ -57,9 +53,12 @@ let UserSchema = Schema({
         required: false
     },
     zona: {
-        type: [Schema.Types.ObjectId],
-        ref: 'Zona',
-        required: [false, 'La zona es necesaria']
+        type: Schema.ObjectId,
+        ref: 'Zona'
+    },
+    club: {
+        type: Schema.ObjectId,
+        ref: 'Club'
     }
 }, userOptions);
 
@@ -74,6 +73,6 @@ UserSchema.methods.toJSON = function() {
 }
 
 // Muestra mensaje en la validación de unique
-UserSchema.plugin(uniqueValidator, { message: '{PATH} debe de ser único' });
+UserSchema.plugin(uniqueValidator, { message: 'El {PATH} ya está registrado' });
 
 module.exports = mongoose.model('User', UserSchema);

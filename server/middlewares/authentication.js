@@ -8,7 +8,14 @@ let verificarToken = (req, res, next) => {
     // Se recoge el header llamado token
     let token = req.get('token');
 
-    jwt.verify(token, process.env.SEED, (err, decoded) => {
+    if (!token) {
+        return res.status(401).send({
+            ok: false,
+            message: 'No hay token en la petición'
+        });
+    }
+
+    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
 
         if (err) {
             return res.status(401).send({
@@ -19,7 +26,7 @@ let verificarToken = (req, res, next) => {
             });
         }
 
-        req.usuario = decoded.usuario;
+        req.id = decoded.id;
         next();
 
     });
@@ -33,7 +40,7 @@ let verificarAdmin_Rol = (req, res, next) => {
 
     let usuario = req.usuario;
 
-    if (usuario.role === 'ADMIN_ROLE') {
+    if (usuario.rol === 'ADMIN_ROLE') {
         next();
     } else {
         return res.json({
@@ -52,7 +59,7 @@ let verificarJugador_Rol = (req, res, next) => {
 
     let usuario = req.usuario;
 
-    if (usuario.role === 'JUGADOR_ROLE') {
+    if (usuario.rol === 'JUGADOR_ROLE') {
         next();
     } else {
         return res.json({
@@ -71,7 +78,7 @@ let verificarEntrenador_Rol = (req, res, next) => {
 
     let usuario = req.usuario;
 
-    if (usuario.role === 'ENTRENADOR_ROL') {
+    if (usuario.rol === 'ENTRENADOR_ROL') {
         next();
     } else {
         return res.json({

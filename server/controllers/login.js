@@ -5,48 +5,38 @@ const { OAuth2Client } = require('google-auth-library');
 const client = new OAuth2Client(process.env.CLIENT_ID);
 
 const User = require('../models/user-models/user');
+const { generarJWT } = require('../helpers/jwt');
+const { response } = require('express');
 
-let login = (req, res) => {
+let login = async(req, res = response) => {
 
     let body = req.body;
 
-    User.findOne({ email: body.email }, (err, usuarioDB) => {
+    const usuarioDB = await User.findOne({ email: body.email });
 
-        if (err) {
-            return res.status(500).json({
-                ok: false,
-                err
-            });
-        }
-
-        if (!usuarioDB) {
-            return res.status(400).json({
-                ok: false,
-                err: {
-                    message: 'Usuario o contraseña incorrectos'
-                }
-            });
-        }
-
-        if (!bcrypt.compareSync(body.password, usuarioDB.password)) {
-            return res.status(400).json({
-                ok: false,
-                err: {
-                    message: 'Usuario o contraseña incorrectos'
-                }
-            });
-        }
-
-        let token = jwt.sign({
-            usuario: usuarioDB
-        }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN });
-
-        res.status(200).send({
-            ok: true,
-            usuario: usuarioDB,
-            token
+    if (!usuarioDB) {
+        return res.status(400).json({
+            ok: false,
+            err: {
+                message: 'Usuario o contraseña incorrectos'
+            }
         });
+    }
 
+    if (!bcrypt.compareSync(body.password, usuarioDB.password)) {
+        return res.status(400).json({
+            ok: false,
+            err: {
+                message: 'Usuario o contraseña incorrectos'
+            }
+        });
+    }
+
+    const token = await generarJWT(usuarioDB.id);
+
+    res.json({
+        ok: true,
+        token
     });
 
 }
@@ -71,7 +61,7 @@ let verify = async(token) => {
 
 let loginGoogle = async(req, res) => {
 
-    let token = req.body.idtoken;
+    let token = req.body.token;
 
     let googleUser = await verify(token)
         .catch(e => {
@@ -98,25 +88,28 @@ let loginGoogle = async(req, res) => {
                     }
                 });
             } else {
-                let token = jwt.sign({
-                    usuario: usuarioDB
-                }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN });
-
-                return res.status(200).send({
-                    ok: true,
-                    usuario: usuarioDB,
-                    token
-                });
+                const token = generarJWT(usuarioDB.id)
+                    .then(token => {
+                        res.status(200).send({
+                            ok: true,
+                            token
+                        });
+                    })
+                    .catch(err => {
+                        res.status(400).send({
+                            ok: false,
+                            err
+                        });
+                    });
             }
         } else {
             // Si el usuario no existe todavía en nuestra BBDD
             let usuario = new User();
 
             usuario.nombre = googleUser.nombre.split(' ')[0];
-            usuario.apellido1 = googleUser.nombre.split(' ')[1];
-            usuario.apellido2 = googleUser.nombre.split(' ')[2];
+            usuario.apellidos = googleUser.nombre.split(' ')[1] + ' ' + googleUser.nombre.split(' ')[2];
             usuario.email = googleUser.email;
-            usuario.image = null;
+            usuario.image = googleUser.image;
             usuario.google = true;
             // Da igual la contraseña en el login de google
             usuario.password = ':)';
@@ -131,21 +124,40 @@ let loginGoogle = async(req, res) => {
                     });
                 }
 
-                let token = jwt.sign({
-                    usuario: usuarioDB
-                }, process.env.SEED, { expiresIn: process.env.CADUCIDAD_TOKEN });
-
-                return res.status(200).send({
-                    ok: true,
-                    usuario: usuarioCreado,
-                    token
-                });
+                const token = generarJWT(usuarioCreado.id)
+                    .then(token => {
+                        res.status(200).send({
+                            ok: true,
+                            token
+                        });
+                    })
+                    .catch(err => {
+                        res.status(400).send({
+                            ok: false,
+                            err
+                        });
+                    });
             });
         }
     });
 }
 
+const renewToken = async(req, res = response) => {
+
+    const id = req.id;
+    const token = await generarJWT(id);
+
+    const usuario = await User.findById(id).populate({ path: 'zona' }).populate({ path: 'club' });
+
+    res.json({
+        ok: true,
+        token,
+        usuario
+    });
+}
+
 module.exports = {
     login,
-    loginGoogle
+    loginGoogle,
+    renewToken
 }

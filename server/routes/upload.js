@@ -7,6 +7,6 @@ api.use(fileUpload());
 
 const UploadController = require('../controllers/upload');
 
-api.put('/upload/:id', UploadController.uploadFile);
+api.put('/upload/:tipo/:id', UploadController.uploadFile);
 
 module.exports = api
