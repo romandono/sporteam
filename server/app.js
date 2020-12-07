@@ -4,6 +4,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const cors = require('cors');
+const path = require('path');
 
 const app = express();
 
@@ -37,5 +38,9 @@ app.use('/api', entrenadores_routes);
 app.use('/api', provincias_routes);
 app.use('/api', clubs_routes);
 app.use('/api', zonas_routes);
+
+app.get('*', (req, res) => {
+    res.sendFile(path(__dirname), 'public/index.html');
+});
 
 module.exports = app;
