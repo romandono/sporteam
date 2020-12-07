@@ -4,7 +4,6 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
 const cors = require('cors');
-const path = require('path');
 
 const app = express();
 
@@ -16,7 +15,7 @@ const login_routes = require('./routes/login');
 const upload_routes = require('./routes/upload');
 const provincias_routes = require('./routes/provincia');
 const clubs_routes = require('./routes/club');
-const zonas_routes = require('./routes/zona')
+const zonas_routes = require('./routes/zona');
 
 // middlewares de bodyparser
 app.use(bodyParser.urlencoded({ extended: false }));
