@@ -64,7 +64,7 @@ let uploadFile = (req, res) => {
                     imagenUsuario(id, res, nombreArchivo, image.url);
                     break;
                 case 'clubs':
-                    imagenClub(id, res, image.url);
+                    imagenClub(id, res, nombreArchivo, image.url);
                     break;
             }
         });
@@ -112,7 +112,7 @@ let imagenUsuario = (id, res, nombreArchivo, urlImagen) => {
     });
 }
 
-let imagenClub = (id, res = response, nombreArchivo) => {
+let imagenClub = (id, res = response, nombreArchivo, urlImagen) => {
     Club.findById(id, (err, clubBD) => {
         if (err) {
             // Borrar imagen existente en fileSystem
@@ -137,13 +137,13 @@ let imagenClub = (id, res = response, nombreArchivo) => {
         // Borrar imagen existente en fileSystem
         borrarArchivoClub(clubBD.image);
 
-        clubBD.image = nombreArchivo;
+        clubBD.image = urlImagen;
 
         clubBD.save((err, clubGuardado) => {
             res.status(200).send({
                 ok: true,
                 usuario: clubGuardado,
-                image: nombreArchivo
+                image: urlImagen
             });
         });
     });
