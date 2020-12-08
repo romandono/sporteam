@@ -17,6 +17,9 @@ const provincias_routes = require('./routes/provincia');
 const clubs_routes = require('./routes/club');
 const zonas_routes = require('./routes/zona');
 
+// configurar cabeceras y cors
+app.use(cors());
+
 // middlewares de bodyparser
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
@@ -24,9 +27,6 @@ app.use(bodyParser.json());
 // habilitar carpeta public para probar login de google
 // no se envía a producción
 app.use(express.static(path.resolve(__dirname, './public')));
-
-// configurar cabeceras y cors
-app.use(cors());
 
 // rutas base
 app.use('/api', user_routes);

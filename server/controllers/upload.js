@@ -7,7 +7,7 @@ const cloudinary = require('cloudinary').v2;
 const User = require('../models/user-models/user');
 const Club = require('../models/club');
 
-let uploadFile = (req, res) => {
+let uploadFile = async(req, res) => {
     console.log('Subida de archivo');
 
     let id = req.params.id;
@@ -41,10 +41,20 @@ let uploadFile = (req, res) => {
 
     // Cambiar nombre al archivo
     let nombreArchivo = `${id}-${new Date().getMilliseconds()}.${extension}`;
-    console.log(archivo);
 
+    await archivo.mv(`uploads/${tipo}/${nombreArchivo}`, (err) => {
+        if (err) {
+            return res.status(500).send({
+                ok: false,
+                err
+            });
+        }
+    });
 
-    archivo.mv(`uploads/${tipo}/${nombreArchivo}`, (err) => {
+    // File upload
+    cloudinary.uploader.upload(`uploads/${tipo}/${nombreArchivo}`, { tags: `${tipo}` }, function(err, image) {
+        console.log();
+        console.log("** File Upload: " + image.url);
         if (err) {
             return res.status(500).send({
                 ok: false,
@@ -52,24 +62,15 @@ let uploadFile = (req, res) => {
             });
         }
 
-        // File upload
-        cloudinary.uploader.upload(`uploads/${tipo}/${nombreArchivo}`, { tags: `${tipo}` }, function(err, image) {
-            console.log();
-            console.log("** File Upload" + image.url);
-            if (err) { console.warn(err); }
-
-            // Imagen cargada, actualización imagen usuario o club
-            switch (tipo) {
-                case 'usuarios':
-                    imagenUsuario(id, res, nombreArchivo, image.url);
-                    break;
-                case 'clubs':
-                    imagenClub(id, res, nombreArchivo, image.url);
-                    break;
-            }
-        });
-
-
+        // Imagen cargada, actualización imagen usuario o club
+        switch (tipo) {
+            case 'usuarios':
+                imagenUsuario(id, res, nombreArchivo, image.url);
+                break;
+            case 'clubs':
+                imagenClub(id, res, nombreArchivo, image.url);
+                break;
+        }
     });
 
 }
@@ -142,7 +143,7 @@ let imagenClub = (id, res = response, nombreArchivo, urlImagen) => {
         clubBD.save((err, clubGuardado) => {
             res.status(200).send({
                 ok: true,
-                usuario: clubGuardado,
+                club: clubGuardado,
                 image: urlImagen
             });
         });
