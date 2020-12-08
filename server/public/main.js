@@ -62,6 +62,9 @@ class Club {
         else if (((_a = this.image) === null || _a === void 0 ? void 0 : _a.includes('https')) || ((_b = this.image) === null || _b === void 0 ? void 0 : _b.includes('http'))) {
             return this.image;
         }
+        else if (this.image) {
+            return `${base_url}/uploads/clubs/${this.image}`;
+        }
         else {
             return 'https://res.cloudinary.com/sporteam/image/upload/v1607430509/no-image_epobu0.jpg';
         }
@@ -102,16 +105,16 @@ const base_url = _environments_environment_prod__WEBPACK_IMPORTED_MODULE_1__["en
 class ImagenPipe {
     transform(imagen, tipo) {
         if (!imagen) {
-            return `${base_url}/uploads/usuarios/no-image`;
+            return 'https://res.cloudinary.com/sporteam/image/upload/v1607430509/no-image_epobu0.jpg';
         }
-        else if (imagen === null || imagen === void 0 ? void 0 : imagen.includes('https')) {
+        else if ((imagen === null || imagen === void 0 ? void 0 : imagen.includes('https')) || (imagen === null || imagen === void 0 ? void 0 : imagen.includes('http'))) {
             return imagen;
         }
         else if (imagen) {
             return `${base_url}/uploads/${tipo}/${imagen}`;
         }
         else {
-            return `${base_url}/uploads/usuarios/no-image`;
+            return 'https://res.cloudinary.com/sporteam/image/upload/v1607430509/no-image_epobu0.jpg';
         }
     }
 }
