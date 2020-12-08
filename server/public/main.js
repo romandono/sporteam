@@ -1437,10 +1437,10 @@ class FileUploadService {
     actualizarFoto(archivo, tipo, id) {
         return Object(tslib__WEBPACK_IMPORTED_MODULE_0__["__awaiter"])(this, void 0, void 0, function* () {
             try {
-                console.log(tipo);
                 const url = `${base_url}/upload/${tipo}/${id}`;
                 const formData = new FormData();
                 formData.append('archivo', archivo);
+                console.log(url);
                 const resp = yield fetch(url, {
                     method: 'PUT',
                     headers: {
@@ -1602,7 +1602,6 @@ class ModalImagenComponent {
             this.imgTemp = null;
         }
         const reader = new FileReader();
-        reader.readAsDataURL(this.imagenSubir);
         reader.onloadend = () => {
             this.imgTemp = reader.result;
         };
@@ -1613,6 +1612,11 @@ class ModalImagenComponent {
         console.log(tipo);
         this.fileUploadService.actualizarFoto(this.imagenSubir, tipo, id || '')
             .then(img => {
+            if (!img) {
+                sweetalert2__WEBPACK_IMPORTED_MODULE_1___default.a.fire('Error', 'No se ha podido cambiar el avatar', 'error');
+                this.cerrarModal();
+                return;
+            }
             sweetalert2__WEBPACK_IMPORTED_MODULE_1___default.a.fire('Guardado', 'Avatar de usuario actualizada', 'success');
             this.modalImagenService.nuevaImagen.emit(img);
             this.cerrarModal();
@@ -3265,7 +3269,7 @@ class ModalImagenService {
         this.id = id;
         this._ocultarModal = false;
         this.tipo = tipo;
-        if (img === null || img === void 0 ? void 0 : img.includes('https')) {
+        if ((img === null || img === void 0 ? void 0 : img.includes('https')) || img.includes('http')) {
             this.img = img;
         }
         else {
