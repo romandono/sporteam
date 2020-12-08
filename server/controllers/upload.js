@@ -2,11 +2,13 @@ const { response } = require('express');
 const fileUpload = require('express-fileupload');
 const fs = require('fs');
 const path = require('path');
+const cloudinary = require('cloudinary').v2;
 
 const User = require('../models/user-models/user');
 const Club = require('../models/club');
 
 let uploadFile = (req, res) => {
+    console.log('Subida de archivo');
 
     let id = req.params.id;
     let tipo = req.params.tipo;
@@ -39,6 +41,8 @@ let uploadFile = (req, res) => {
 
     // Cambiar nombre al archivo
     let nombreArchivo = `${id}-${new Date().getMilliseconds()}.${extension}`;
+    console.log(archivo);
+
 
     archivo.mv(`uploads/${tipo}/${nombreArchivo}`, (err) => {
         if (err) {
@@ -48,22 +52,29 @@ let uploadFile = (req, res) => {
             });
         }
 
-        // Imagen cargada, actualización imagen usuario o club
-        switch (tipo) {
-            case 'usuarios':
-                imagenUsuario(id, res, nombreArchivo);
-                break;
-            case 'clubs':
-                imagenClub(id, res, nombreArchivo);
-                break;
-        }
+        // File upload
+        cloudinary.uploader.upload(`uploads/${tipo}/${nombreArchivo}`, { tags: `${tipo}` }, function(err, image) {
+            console.log();
+            console.log("** File Upload" + image.url);
+            if (err) { console.warn(err); }
+
+            // Imagen cargada, actualización imagen usuario o club
+            switch (tipo) {
+                case 'usuarios':
+                    imagenUsuario(id, res, nombreArchivo, image.url);
+                    break;
+                case 'clubs':
+                    imagenClub(id, res, image.url);
+                    break;
+            }
+        });
 
 
     });
 
 }
 
-let imagenUsuario = (id, res, nombreArchivo) => {
+let imagenUsuario = (id, res, nombreArchivo, urlImagen) => {
 
     User.findById(id, (err, usuarioDB) => {
         if (err) {
@@ -89,13 +100,13 @@ let imagenUsuario = (id, res, nombreArchivo) => {
         // Borrar imagen existente en fileSystem
         borrarArchivo(usuarioDB.image);
 
-        usuarioDB.image = nombreArchivo;
+        usuarioDB.image = urlImagen;
 
         usuarioDB.save((err, usuarioGuardado) => {
             res.status(200).send({
                 ok: true,
                 usuario: usuarioGuardado,
-                image: nombreArchivo
+                image: urlImagen
             });
         });
     });
