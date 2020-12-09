@@ -10,8 +10,6 @@ let getClubs = async(req, res = response) => {
     let clubs = await ClubSchema.find({})
         .populate({ path: 'provincia' })
         .populate({ path: 'zona' })
-        .skip(Number(desde))
-        .limit(Number(limite))
         .catch(err => {
             res.status(400).send({
                 ok: false,

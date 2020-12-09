@@ -24,8 +24,6 @@ let getEntrenadores = (req, res) => {
     let limite = req.query.limite || 20;
 
     Entrenador.find({ estado: true })
-        .skip(Number(desde))
-        .limit(Number(limite))
         .exec((err, entrenadores) => {
 
             if (err) {

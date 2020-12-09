@@ -24,8 +24,6 @@ let getJugadores = (req, res) => {
     let limite = req.query.limite || 5;
 
     Jugador.find()
-        .skip(Number(desde))
-        .limit(Number(limite))
         .exec((err, jugadores) => {
 
             if (err) {
