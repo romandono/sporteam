@@ -28,7 +28,8 @@ UserSchema.discriminator('Jugador', Schema({
     peso: {
         type: Number,
         required: [false, 'El peso es necesario']
-    }
+    },
+    estadisticas: [{ type: Schema.Types.ObjectId, ref: 'Estadistica' }]
 }), );
 
 module.exports = mongoose.model('Jugador');

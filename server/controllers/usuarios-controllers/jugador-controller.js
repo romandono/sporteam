@@ -24,6 +24,7 @@ let getJugadores = (req, res) => {
     let limite = req.query.limite || 5;
 
     Jugador.find()
+        .populate({ path: 'estadisticas' })
         .exec((err, jugadores) => {
 
             if (err) {

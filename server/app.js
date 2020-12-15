@@ -16,6 +16,7 @@ const upload_routes = require('./routes/upload');
 const provincias_routes = require('./routes/provincia');
 const clubs_routes = require('./routes/club');
 const zonas_routes = require('./routes/zona');
+const estadisticas_routes = require('./routes/estadisitca');
 
 // configurar cabeceras y cors
 app.use(cors());
@@ -37,6 +38,7 @@ app.use('/api', entrenadores_routes);
 app.use('/api', provincias_routes);
 app.use('/api', clubs_routes);
 app.use('/api', zonas_routes);
+app.use('/api', estadisticas_routes);
 
 app.get('*', (req, res) => {
     res.sendFile(path.resolve(__dirname, './public/index.html'));

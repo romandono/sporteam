@@ -28,6 +28,7 @@
         "lodash": "^4.17.20",
         "moment": "^2.29.1",
         "mongoose": "^5.10.15",
+        "mongoose-deep-populate": "^3.2.0",
         "mongoose-unique-validator": "^2.0.3",
         "properties-reader": "^2.1.1",
         "underscore": "^1.11.0"
