@@ -32,13 +32,7 @@ let getUsuarios = (req, res) => {
     let desde = req.query.desde || 0;
     let limite = req.query.limite || 9;
 
-    User.find({})
-        .populate({
-            path: 'zona',
-        })
-        .populate({
-            path: 'club'
-        })
+    User.find({ role: { $ne: 'ADMIN_ROLE' } })
         .skip(Number(desde))
         .limit(Number(limite))
         .exec((err, usuarios) => {
@@ -50,17 +44,11 @@ let getUsuarios = (req, res) => {
                 });
             }
 
-            usuarios = _.without(usuarios, _.findWhere(usuarios, {
-                role: 'ADMIN_ROLE'
-            }));
-
-            User.countDocuments({}, (err, total) => {
-                res.status(200).send({
-                    ok: true,
-                    usuarios,
-                    total: total
-                });
-            })
+            res.status(200).send({
+                ok: true,
+                usuarios,
+                total: usuarios.length
+            });
         });
 }
 

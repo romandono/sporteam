@@ -8,8 +8,6 @@ let getClubs = async(req, res = response) => {
     let limite = req.query.limite || 5;
 
     let clubs = await ClubSchema.find({})
-        .populate({ path: 'provincia' })
-        .populate({ path: 'zona' })
         .catch(err => {
             res.status(400).send({
                 ok: false,

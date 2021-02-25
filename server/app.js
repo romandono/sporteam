@@ -27,7 +27,7 @@ app.use(bodyParser.json());
 
 // habilitar carpeta public para probar login de google
 // no se envía a producción
-app.use(express.static(path.resolve(__dirname, './public')));
+//app.use(express.static(path.resolve(__dirname, './public')));
 
 // rutas base
 app.use('/api', user_routes);
@@ -40,8 +40,8 @@ app.use('/api', clubs_routes);
 app.use('/api', zonas_routes);
 app.use('/api', estadisticas_routes);
 
-app.get('*', (req, res) => {
+/* app.get('*', (req, res) => {
     res.sendFile(path.resolve(__dirname, './public/index.html'));
-});
+}); */
 
 module.exports = app;

@@ -1,5 +1,7 @@
 const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator');
+const ZonaModel = require('../zona');
+const ClubModel = require('../club');
 
 let rolesValidos = {
     values: ['ADMIN_ROLE', 'USER_ROLE', 'JUGADOR_ROLE', 'ENTRENADOR_ROLE', 'CLUB_ROLE'],
@@ -52,12 +54,12 @@ let UserSchema = Schema({
         type: String,
         required: false
     },
-    zona: {
-        type: Schema.ObjectId,
+    zona: [{
+        type: ZonaModel.schema,
         ref: 'Zona'
-    },
+    }],
     club: {
-        type: Schema.ObjectId,
+        type: ClubModel.schema,
         ref: 'Club'
     }
 }, userOptions);
