@@ -1,2 +1,2 @@
-# sporteam
-Proyecto sporteam
+# Sporteam
+Proyecto backend sporteam
