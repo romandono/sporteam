@@ -1,6 +1,8 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 
+const TemporadaModel = require('./temporada');
+
 var EstadisticaSchema = Schema({
     partidosJugados: Number,
     goles: Number,
@@ -8,7 +10,7 @@ var EstadisticaSchema = Schema({
     tarjetasAmarillas: Number,
     tarjetasRojas: Number,
     temporada: {
-        type: Schema.ObjectId,
+        type: TemporadaModel.schema,
         ref: 'Temporada'
     }
 });

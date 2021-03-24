@@ -3,6 +3,7 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 
 const UserSchema = require('./user');
+const EstadisticaModel = require('../estadistica');
 
 UserSchema.discriminator('Jugador', Schema({
     nombreDeportivo: {
@@ -29,7 +30,7 @@ UserSchema.discriminator('Jugador', Schema({
         type: Number,
         required: [false, 'El peso es necesario']
     },
-    estadisticas: [{ type: Schema.Types.ObjectId, ref: 'Estadistica' }]
+    estadisticas: [{ type: EstadisticaModel.schema, ref: 'Estadistica' }]
 }), );
 
 module.exports = mongoose.model('Jugador');

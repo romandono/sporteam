@@ -147,7 +147,7 @@ const renewToken = async(req, res = response) => {
     const id = req.id;
     const token = await generarJWT(id);
 
-    const usuario = await User.findById(id).populate({ path: 'zona' }).populate({ path: 'club' });
+    const usuario = await User.findById(id);
 
     res.json({
         ok: true,

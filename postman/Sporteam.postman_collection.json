@@ -1,0 +1,520 @@
+{
+	"info": {
+		"_postman_id": "efb7ff38-9e04-4972-b3b4-43583e68ca72",
+		"name": "Sporteam",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Usuario: PUT",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "nombre",
+							"value": "Mar",
+							"type": "text"
+						},
+						{
+							"key": "google",
+							"value": "false",
+							"type": "text"
+						},
+						{
+							"key": "apellido2",
+							"value": "López",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "email",
+							"value": "david@david.com",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "password",
+							"value": "admin",
+							"type": "text",
+							"disabled": true
+						},
+						{
+							"key": "role",
+							"value": "USER_ROLE",
+							"type": "text",
+							"disabled": true
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/usuario/5f9f036a14bc220f0df96389",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"usuario",
+						"5f9f036a14bc220f0df96389"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Usuario: Crear usuario",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "nombre",
+							"value": "Román",
+							"type": "text"
+						},
+						{
+							"key": "apellido1",
+							"value": "Dono",
+							"type": "text"
+						},
+						{
+							"key": "apellido2",
+							"value": "Pérez",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "roman@dono.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "admin",
+							"type": "text"
+						},
+						{
+							"key": "role",
+							"value": "ADMIN_ROLE",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/register",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Usuario: GET usuarios",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {
+					"connection": true,
+					"accept-encoding": true,
+					"accept": true,
+					"user-agent": true,
+					"host": true
+				}
+			},
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c3VhcmlvIjp7ImVzdGFkbyI6dHJ1ZSwiZ29vZ2xlIjpmYWxzZSwiX2lkIjoiNWZhZjIwM2VhNDY1ZmMxZGZjMTYxZTUyIiwibm9tYnJlIjoiVGVzdDIiLCJhcGVsbGlkbzEiOiJUZXN0MiIsImFwZWxsaWRvMiI6IlRlc3QyIiwiZW1haWwiOiJ0ZXN0MkBnbWFpbC5jb20iLCJpbWFnZSI6bnVsbCwicm9sZSI6IlVTRVJfUk9MRSIsIl9fdiI6MH0sImlhdCI6MTYwNTM4NDg2NiwiZXhwIjoxNjA3OTc2ODY2fQ.TEL7QOEGPBVMYuvfOIPXKD1pQ-15iCMfHF1dWm2shLs",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/usuarios",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"usuarios"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Usuario: DELETE usuario",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/usuario/5faf11637d1da435cccbc5a4",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"usuario",
+						"5faf11637d1da435cccbc5a4"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Usuario: Login",
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjVmYWYyMDJhYTQ2NWZjMWRmYzE2MWU1MSIsImlhdCI6MTYwNjU5MTEwOSwiZXhwIjoxNjA2NjM0MzA5fQ.FjO7FzEKbKY6tPZF76kvn1vhqCd4kTUYB51eTtpQVJ0",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "email",
+							"value": "raton@gmail.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "123456",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/login",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"login"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Login: Google",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "idtoken",
+							"value": "eyJhbGciOiJSUzI1NiIsImtpZCI6ImQ5NDZiMTM3NzM3Yjk3MzczOGU1Mjg2YzIwOGI2NmU3YTM5ZWU3YzEiLCJ0eXAiOiJKV1QifQ.eyJpc3MiOiJhY2NvdW50cy5nb29nbGUuY29tIiwiYXpwIjoiMTA2NTQ3MDM1MDI4My1vcG5vYzRsczR2a3I0NWIwdTJnNDJpNGY2ajZtdXRkYi5hcHBzLmdvb2dsZXVzZXJjb250ZW50LmNvbSIsImF1ZCI6IjEwNjU0NzAzNTAyODMtb3Bub2M0bHM0dmtyNDViMHUyZzQyaTRmNmo2bXV0ZGIuYXBwcy5nb29nbGV1c2VyY29udGVudC5jb20iLCJzdWIiOiIxMDA2NjMzMzgxODUxNTgyNTYwMzMiLCJoZCI6Imllc3NhbmNsZW1lbnRlLm5ldCIsImVtYWlsIjoiYTIwcm9tYW5kcEBpZXNzYW5jbGVtZW50ZS5uZXQiLCJlbWFpbF92ZXJpZmllZCI6dHJ1ZSwiYXRfaGFzaCI6IndmLWNPeDNIaWRhS1JQN1ZhWENPZ2ciLCJuYW1lIjoiUm9tw6FuIERvbm8gUMOpcmV6IiwicGljdHVyZSI6Imh0dHBzOi8vbGg1Lmdvb2dsZXVzZXJjb250ZW50LmNvbS8taXpBdzRhb0x4MEEvQUFBQUFBQUFBQUkvQUFBQUFBQUFBQUEvQU1adXVjbVRKMkx0MzV1bFdXY19UcGFkRGtWVVN5ZEVtdy9zOTYtYy9waG90by5qcGciLCJnaXZlbl9uYW1lIjoiUm9tw6FuIiwiZmFtaWx5X25hbWUiOiJEb25vIFDDqXJleiIsImxvY2FsZSI6ImVzIiwiaWF0IjoxNjA1Mzk2ODY0LCJleHAiOjE2MDU0MDA0NjQsImp0aSI6IjBlY2RiZGFjMjVhOTc5Njg2YzkxODNkNDI1ZTNmNThmYzExYTM2NGQifQ.LS4ubft2mGLHohVagA8d74lxXULde-Gr-nlvs5uRBi7b3YhJ67K-Iio4BWel694HLkH8ZkHhGe64m51OAHIIhhh3s8QWtL4xUQN5Jl1BXDp1xelJa40FrDAkVOY1UaIirqmt_UTsmXMcO5dt4TN3uI2H4ZMSrgRC1zR2D2FCWrdA02k-2aQq03Qk6GrtFJUaC28Y1J5_n9U7MVA4uKGbH9hGJy7qqHU8OUp-UTTgIUwzDvDVj33u9m0112_RJ5KCGBtulHdeYcvmy4VSzgKFeqJIhNUf8hoau9PE2hqH3IUAUdloojSljEVzI1cd6EEbLy4Easi8rNzEqJf1W-gQuA\n",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/google",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"google"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Usuario: Upload Image",
+			"request": {
+				"method": "PUT",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "archivo",
+							"type": "file",
+							"src": "/C:/Users/marad/OneDrive/Desktop/foto_linkedin.jpeg"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/upload/5fb06588589cde257c787c56",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"upload",
+						"5fb06588589cde257c787c56"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Usuario: GET Image",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/usuario/image/5fb17d64d8b01b1dd46daec1?token={{token}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"usuario",
+						"image",
+						"5fb17d64d8b01b1dd46daec1"
+					],
+					"query": [
+						{
+							"key": "token",
+							"value": "{{token}}"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Entrenador: Crear entrenador",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "nombre",
+							"value": "Pablo",
+							"type": "text"
+						},
+						{
+							"key": "apellido1",
+							"value": "Dono",
+							"type": "text"
+						},
+						{
+							"key": "apellido2",
+							"value": "Pérez",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "pablo@dono.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "123456",
+							"type": "text"
+						},
+						{
+							"key": "role",
+							"value": "ENTRENADOR_ROLE",
+							"type": "text"
+						},
+						{
+							"key": "estadoDeportivo",
+							"value": "En activo",
+							"type": "text"
+						},
+						{
+							"key": "zona",
+							"value": "5fb422d6d8a62200fb58e870",
+							"type": "text"
+						},
+						{
+							"key": "nombreDeportivo",
+							"value": "Maradono",
+							"type": "text"
+						},
+						{
+							"key": "entrenadorPorteros",
+							"value": "false",
+							"type": "text"
+						},
+						{
+							"key": "titulacion",
+							"value": "Entrenador nivel 3",
+							"type": "text"
+						},
+						{
+							"key": "telefono",
+							"value": "987654321",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/entrenador",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"entrenador"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Jugador: Crear jugador",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "nombre",
+							"value": "Ronaldo",
+							"type": "text"
+						},
+						{
+							"key": "apellido1",
+							"value": "Nazario",
+							"type": "text"
+						},
+						{
+							"key": "apellido2",
+							"value": "De Lima",
+							"type": "text"
+						},
+						{
+							"key": "email",
+							"value": "ronaldo@gordo.com",
+							"type": "text"
+						},
+						{
+							"key": "password",
+							"value": "123456",
+							"type": "text"
+						},
+						{
+							"key": "role",
+							"value": "JUGADOR_ROLE",
+							"type": "text"
+						},
+						{
+							"key": "estadoDeportivo",
+							"value": "Sin equipo",
+							"type": "text"
+						},
+						{
+							"key": "zona",
+							"value": "5fb422f8d8a62200fb58ed8e",
+							"type": "text"
+						},
+						{
+							"key": "nombreDeportivo",
+							"value": "El gordo",
+							"type": "text"
+						},
+						{
+							"key": "fechaNacimiento",
+							"value": "1976-09-18",
+							"type": "text"
+						},
+						{
+							"key": "lateralidad",
+							"value": "Diestro",
+							"type": "text"
+						},
+						{
+							"key": "demarcacion",
+							"value": "Delantero",
+							"type": "text"
+						},
+						{
+							"key": "altura",
+							"value": "185",
+							"type": "text"
+						},
+						{
+							"key": "peso",
+							"value": "85",
+							"type": "text"
+						},
+						{
+							"key": "zona",
+							"value": "5fb446fbd8a62200fb60f380",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/jugador",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"jugador"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Jugador PUT: Actualizar jugador",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "token",
+						"value": "{{token}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "urlencoded",
+					"urlencoded": [
+						{
+							"key": "altura",
+							"value": "190",
+							"type": "text"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{url}}/jugador/5fb55fd3feb6fd1029cea2dc",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"jugador",
+						"5fb55fd3feb6fd1029cea2dc"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
