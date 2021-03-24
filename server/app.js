@@ -40,8 +40,8 @@ app.use('/api', clubs_routes);
 app.use('/api', zonas_routes);
 app.use('/api', estadisticas_routes);
 
-/* app.get('*', (req, res) => {
+app.get('*', (req, res) => {
     res.sendFile(path.resolve(__dirname, './public/index.html'));
-}); */
+});
 
 module.exports = app;
