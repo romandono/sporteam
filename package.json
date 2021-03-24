@@ -30,10 +30,12 @@
         "mongoose": "^5.10.15",
         "mongoose-deep-populate": "^3.2.0",
         "mongoose-unique-validator": "^2.0.3",
+        "mysql2": "^2.2.5",
         "properties-reader": "^2.1.1",
+        "sequelize": "^6.3.5",
         "underscore": "^1.11.0"
     },
     "devDependencies": {
-        "nodemon": "^2.0.6"
+        "nodemon": "^2.0.7"
     }
 }

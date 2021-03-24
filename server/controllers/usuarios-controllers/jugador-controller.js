@@ -88,7 +88,7 @@ let getJugador = (req, res) => {
             ok: true,
             jugador
         });
-    }).populate({ path: 'club' }).populate({ path: 'zona' });
+    });
 }
 
 let getJugadoresPorZona = (req, res = response) => {
