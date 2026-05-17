@@ -1,12 +1,14 @@
 import { Router, Request, Response } from 'express';
 import * as UserController from '../../controllers/usuarios-controllers/users-controller';
 import { verificarToken } from '../../middleware/authentication';
+import { createUserValidation } from '../../validators';
+import { validate } from '../../middleware/validate';
 
 const api = Router();
 
 api.get('/usuarios', UserController.getUsuarios);
 api.get('/usuario/:id', UserController.getUsuario);
-api.post('/usuario', UserController.saveUser);
+api.post('/usuario', createUserValidation, validate, UserController.saveUser);
 api.put('/usuario/:id', UserController.updateUser);
 api.delete('/usuario/:id', UserController.deleteUser);
 api.get('/uploads/:tipo/:foto', UserController.getUserImage);

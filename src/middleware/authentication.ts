@@ -3,8 +3,16 @@ import jwt from 'jsonwebtoken';
 import User from '../models/user-models/user';
 import { AuthenticatedRequest, JwtPayload } from '../types';
 
+const extractToken = (req: AuthenticatedRequest): string | undefined => {
+  const authHeader = req.get('Authorization');
+  if (authHeader && authHeader.startsWith('Bearer ')) {
+    return authHeader.slice(7);
+  }
+  return req.get('token');
+};
+
 let verificarToken = (req: AuthenticatedRequest, res: Response, next: NextFunction) => {
-  let token = req.get('token');
+  let token = extractToken(req);
 
   if (!token) {
     return res.status(401).send({

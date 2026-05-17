@@ -1,6 +1,8 @@
 import { Router } from 'express';
 import * as LoginController from '../controllers/login';
 import { verificarToken } from '../middleware/authentication';
+import { loginValidation } from '../validators';
+import { validate } from '../middleware/validate';
 
 const api = Router();
 
@@ -25,7 +27,7 @@ const api = Router();
  *       400:
  *         description: Credenciales incorrectas
  */
-api.post('/login', LoginController.login);
+api.post('/login', loginValidation, validate, LoginController.login);
 
 /**
  * @openapi
