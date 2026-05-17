@@ -4,7 +4,9 @@ import express from 'express';
 import bodyParser from 'body-parser';
 import path from 'path';
 import cors from 'cors';
+import swaggerUi from 'swagger-ui-express';
 
+import swaggerSpec from './docs/swagger';
 import userRoutes from './routes/user-routes/usuario-route';
 import jugadorRoutes from './routes/user-routes/jugador-route';
 import entrenadorRoutes from './routes/user-routes/entrenador-route';
@@ -25,6 +27,12 @@ app.use(bodyParser.json());
 
 const publicPath = path.resolve(__dirname, '../server/public');
 app.use(express.static(publicPath));
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.get('/api-docs.json', (req, res) => {
+  res.setHeader('Content-Type', 'application/json');
+  res.send(swaggerSpec);
+});
 
 app.use('/api', userRoutes);
 app.use('/api', loginRoutes);

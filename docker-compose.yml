@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: sporteam-mongo
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo-data:/data/db
+    environment:
+      MONGO_INITDB_DATABASE: sporteam
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: sporteam-api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      PORT: "3000"
+      DB_CNN: "mongodb://mongodb:27017/sporteam?retryWrites=true"
+      JWT_SECRET: "${JWT_SECRET:-cambia-esta-secret-key-en-produccion}"
+      CLIENT_ID: "${CLIENT_ID:-}"
+      CLOUDINARY_URL: "${CLOUDINARY_URL:-}"
+    depends_on:
+      - mongodb
+
+volumes:
+  mongo-data:
