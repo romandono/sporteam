@@ -4,3 +4,4 @@ dist/
 coverage/
 *.js.map
 .mongodb-uri.json
+.env
