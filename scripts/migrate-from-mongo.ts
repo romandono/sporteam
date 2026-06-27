@@ -15,7 +15,6 @@
  */
 
 import { PrismaClient } from '../src/generated/prisma/client';
-import { PrismaNeon } from '@prisma/adapter-neon';
 
 async function main() {
   const mongoUrl = process.env.MONGO_URL || process.env.DB_CNN;
@@ -29,8 +28,7 @@ async function main() {
   await mongoose.default.connect(mongoUrl);
 
   console.log('Conectando a PostgreSQL...');
-  const adapter = new PrismaNeon({ connectionString: process.env.DATABASE_URL });
-  const prisma = new PrismaClient({ adapter } as any);
+  const prisma = new PrismaClient({});
   await prisma.$connect();
 
   const db = mongoose.default.connection.db;

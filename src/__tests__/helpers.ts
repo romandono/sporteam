@@ -12,12 +12,10 @@ const disconnectDB = async () => {
 const TABLES = [
   'user_zonas', 'estadisticas', 'jugadores', 'entrenadores',
   'users', 'clubs', 'temporadas', 'provincias', 'zonas', 'localidades'
-];
+].map(t => `"${t}"`).join(', ');
 
 const cleanDB = async () => {
-  for (const table of TABLES) {
-    await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE`);
-  }
+  await prisma.$executeRawUnsafe(`TRUNCATE TABLE ${TABLES} CASCADE`);
 };
 
 export { app, connectDB, disconnectDB, cleanDB, prisma };

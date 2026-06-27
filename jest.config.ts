@@ -27,6 +27,7 @@ const config: Config = {
       statements: 55
     }
   },
+  maxWorkers: 1,
   verbose: true,
   setupFiles: ['<rootDir>/src/__tests__/env-setup.ts'],
   testTimeout: 60000

@@ -35,8 +35,7 @@ describe('Entrenadores - CRUD', () => {
         password: 'pass123',
         role: 'ENTRENADOR_ROLE',
         nombreDeportivo: 'Coach',
-        titulacion: ['Nivel 1', 'Nivel 2'],
-        telefono: 600123456
+        titulacion: ['Nivel 1', 'Nivel 2']
       });
 
     expect(res.status).toBe(200);
