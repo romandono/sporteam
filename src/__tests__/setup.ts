@@ -1,17 +1,14 @@
-import mongoose from 'mongoose';
+import prisma from '../lib/prisma';
+import { cleanDB } from './helpers';
 
 beforeAll(async () => {
-  await mongoose.connect(process.env.DB_CNN || '');
-  (mongoose as any).Promise = global.Promise;
+  await prisma.$connect();
 });
 
 afterEach(async () => {
-  const collections = mongoose.connection.collections;
-  for (const key in collections) {
-    await collections[key].deleteMany({});
-  }
+  await cleanDB();
 });
 
 afterAll(async () => {
-  await mongoose.disconnect();
+  await prisma.$disconnect();
 });

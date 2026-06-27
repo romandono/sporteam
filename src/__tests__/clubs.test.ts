@@ -1,8 +1,6 @@
 import request from 'supertest';
 import bcrypt from 'bcrypt';
-import { app, connectDB, disconnectDB, cleanDB } from './helpers';
-import User from '../models/user-models/user';
-import Club from '../models/club';
+import { app, connectDB, disconnectDB, cleanDB, prisma } from './helpers';
 
 describe('Clubs - CRUD', () => {
   beforeAll(async () => { await connectDB(); });
@@ -12,14 +10,14 @@ describe('Clubs - CRUD', () => {
   let token: string;
 
   beforeEach(async () => {
-    const user = new User({
-      nombre: 'Admin',
-      apellidos: 'Club',
-      email: 'admin@test.com',
-      password: bcrypt.hashSync('pass123', 10),
-      role: 'ADMIN_ROLE'
+    await prisma.user.create({
+      data: {
+        nombre: 'Admin', apellidos: 'Club',
+        email: 'admin@test.com',
+        password: bcrypt.hashSync('pass123', 10),
+        role: 'ADMIN_ROLE'
+      }
     });
-    await user.save();
 
     const loginRes = await request(app)
       .post('/api/login')
@@ -42,7 +40,7 @@ describe('Clubs - CRUD', () => {
   });
 
   it('GET /api/clubs - debe listar clubs con token', async () => {
-    await Club.create({ nombre: 'FC Test', localidad: 'City' });
+    await prisma.club.create({ data: { nombre: 'FC Test', localidad: 'City' } });
 
     const res = await request(app)
       .get('/api/clubs')

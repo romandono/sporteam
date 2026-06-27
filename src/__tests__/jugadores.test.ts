@@ -1,7 +1,6 @@
 import request from 'supertest';
 import bcrypt from 'bcrypt';
-import { app, connectDB, disconnectDB, cleanDB } from './helpers';
-import User from '../models/user-models/user';
+import { app, connectDB, disconnectDB, cleanDB, prisma } from './helpers';
 
 describe('Jugadores - CRUD', () => {
   beforeAll(async () => { await connectDB(); });
@@ -11,15 +10,15 @@ describe('Jugadores - CRUD', () => {
   let token: string;
 
   beforeEach(async () => {
-    const user = new User({
-      nombre: 'Test',
-      apellidos: 'Jugador',
-      email: 'jugador@test.com',
-      password: bcrypt.hashSync('pass123', 10),
-      role: 'JUGADOR_ROLE',
-      usertype: 'Jugador'
+    await prisma.user.create({
+      data: {
+        nombre: 'Test', apellidos: 'Jugador',
+        email: 'jugador@test.com',
+        password: bcrypt.hashSync('pass123', 10),
+        role: 'JUGADOR_ROLE',
+        jugador: { create: {} }
+      }
     });
-    await user.save();
 
     const loginRes = await request(app)
       .post('/api/login')
@@ -31,8 +30,7 @@ describe('Jugadores - CRUD', () => {
     const res = await request(app)
       .post('/api/jugador')
       .send({
-        nombre: 'Nuevo',
-        apellidos: 'Jugador',
+        nombre: 'Nuevo', apellidos: 'Jugador',
         email: 'nuevo-jug@test.com',
         password: 'pass123',
         role: 'JUGADOR_ROLE',

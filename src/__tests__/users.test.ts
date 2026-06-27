@@ -1,7 +1,6 @@
 import request from 'supertest';
 import bcrypt from 'bcrypt';
-import { app, connectDB, disconnectDB, cleanDB } from './helpers';
-import User from '../models/user-models/user';
+import { app, connectDB, disconnectDB, cleanDB, prisma } from './helpers';
 
 describe('Users - GET /api/usuarios', () => {
   beforeAll(async () => { await connectDB(); });
@@ -9,10 +8,12 @@ describe('Users - GET /api/usuarios', () => {
   afterEach(async () => { await cleanDB(); });
 
   beforeEach(async () => {
-    await User.create([
-      { nombre: 'User1', apellidos: 'Test', email: 'user1@test.com', password: bcrypt.hashSync('pass', 10), role: 'USER_ROLE' },
-      { nombre: 'User2', apellidos: 'Test', email: 'user2@test.com', password: bcrypt.hashSync('pass', 10), role: 'USER_ROLE' }
-    ]);
+    await prisma.user.createMany({
+      data: [
+        { nombre: 'User1', apellidos: 'Test', email: 'user1@test.com', password: bcrypt.hashSync('pass', 10), role: 'USER_ROLE' },
+        { nombre: 'User2', apellidos: 'Test', email: 'user2@test.com', password: bcrypt.hashSync('pass', 10), role: 'USER_ROLE' }
+      ]
+    });
   });
 
   it('debe listar usuarios', async () => {
@@ -33,8 +34,7 @@ describe('Users - POST /api/usuario', () => {
     const res = await request(app)
       .post('/api/usuario')
       .send({
-        nombre: 'New',
-        apellidos: 'User',
+        nombre: 'New', apellidos: 'User',
         email: 'new@test.com',
         password: 'password123',
         role: 'USER_ROLE'
@@ -50,8 +50,7 @@ describe('Users - POST /api/usuario', () => {
     await request(app)
       .post('/api/usuario')
       .send({
-        nombre: 'First',
-        apellidos: 'User',
+        nombre: 'First', apellidos: 'User',
         email: 'dup@test.com',
         password: 'password123',
         role: 'USER_ROLE'
@@ -60,8 +59,7 @@ describe('Users - POST /api/usuario', () => {
     const res = await request(app)
       .post('/api/usuario')
       .send({
-        nombre: 'Second',
-        apellidos: 'User',
+        nombre: 'Second', apellidos: 'User',
         email: 'dup@test.com',
         password: 'password123',
         role: 'USER_ROLE'
@@ -79,14 +77,15 @@ describe('Users - PUT /api/usuario/:id', () => {
   let userId: string;
 
   beforeEach(async () => {
-    const user = await User.create({
-      nombre: 'Original',
-      apellidos: 'User',
-      email: 'original@test.com',
-      password: bcrypt.hashSync('pass', 10),
-      role: 'USER_ROLE'
+    const user = await prisma.user.create({
+      data: {
+        nombre: 'Original', apellidos: 'User',
+        email: 'original@test.com',
+        password: bcrypt.hashSync('pass', 10),
+        role: 'USER_ROLE'
+      }
     });
-    userId = user._id.toString();
+    userId = user.id;
   });
 
   it('debe actualizar un usuario', async () => {
@@ -108,14 +107,15 @@ describe('Users - DELETE /api/usuario/:id', () => {
   let userId: string;
 
   beforeEach(async () => {
-    const user = await User.create({
-      nombre: 'ToDelete',
-      apellidos: 'User',
-      email: 'delete@test.com',
-      password: bcrypt.hashSync('pass', 10),
-      role: 'USER_ROLE'
+    const user = await prisma.user.create({
+      data: {
+        nombre: 'ToDelete', apellidos: 'User',
+        email: 'delete@test.com',
+        password: bcrypt.hashSync('pass', 10),
+        role: 'USER_ROLE'
+      }
     });
-    userId = user._id.toString();
+    userId = user.id;
   });
 
   it('debe eliminar un usuario', async () => {

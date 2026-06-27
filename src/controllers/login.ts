@@ -1,37 +1,24 @@
-import bcrypt from 'bcrypt';
 import { Response } from 'express';
 import { OAuth2Client } from 'google-auth-library';
-import User from '../models/user-models/user';
-import { generarJWT } from '../helpers/jwt';
 import { AuthenticatedRequest } from '../types';
+import * as authService from '../services/authService';
+import { AppError } from '../middleware/errorHandler';
 
 const client = new OAuth2Client(process.env.CLIENT_ID);
 
-let login = async(req: AuthenticatedRequest, res: Response) => {
-  let body = req.body;
+let login = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const body = req.body;
+    const result = await authService.loginUser(body.email, body.password);
 
-  const usuarioDB = await User.findOne({ email: body.email });
-
-  if (!usuarioDB) {
-    return res.status(400).json({
-      ok: false,
-      err: { message: 'Usuario o contraseña incorrectos' }
-    });
+    const { password, ...usuarioSinPassword } = result.usuario;
+    res.json({ ok: true, token: result.token, usuario: usuarioSinPassword });
+  } catch (err) {
+    if (err instanceof AppError) {
+      return res.status(err.statusCode).json({ ok: false, err: { message: err.message } });
+    }
+    res.status(500).json({ ok: false, err: { message: 'Error interno del servidor' } });
   }
-
-  if (!bcrypt.compareSync(body.password, usuarioDB.password)) {
-    return res.status(400).json({
-      ok: false,
-      err: { message: 'Usuario o contraseña incorrectos' }
-    });
-  }
-
-  const token = await generarJWT(usuarioDB.id);
-
-  res.json({
-    ok: true,
-    token
-  });
 };
 
 interface GoogleUser {
@@ -41,7 +28,7 @@ interface GoogleUser {
   google: boolean;
 }
 
-let verify = async(token: string): Promise<GoogleUser> => {
+let verify = async (token: string): Promise<GoogleUser> => {
   const ticket = await client.verifyIdToken({
     idToken: token,
     audience: process.env.CLIENT_ID
@@ -56,95 +43,41 @@ let verify = async(token: string): Promise<GoogleUser> => {
   };
 };
 
-let loginGoogle = async(req: AuthenticatedRequest, res: Response) => {
-  let token = req.body.token;
-
+let loginGoogle = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    let googleUser = await verify(token);
+    const googleUser = await verify(req.body.token);
+    const parts = googleUser.nombre.split(' ');
+    const nombre = parts[0] || '';
+    const apellidos = (parts[1] || '') + ' ' + (parts[2] || '');
 
-    User.findOne({ email: googleUser.email }, async(err, usuarioDB) => {
-      if (err) {
-        return res.status(500).json({
-          ok: false,
-          err
-        });
-      }
+    const result = await authService.loginGoogle(googleUser.email, nombre, apellidos.trim(), req.body.token);
 
-      if (usuarioDB) {
-        if (usuarioDB.google === false) {
-          return res.status(400).json({
-            ok: false,
-            err: { message: 'Debe usar su usuario de aplicación' }
-          });
-        }
-
-        try {
-          const jwtToken = await generarJWT(usuarioDB.id);
-          return res.status(200).send({
-            ok: true,
-            token: jwtToken
-          });
-        } catch (err) {
-          return res.status(400).send({
-            ok: false,
-            err
-          });
-        }
-      }
-
-      let usuario = new User();
-      usuario.nombre = googleUser.nombre.split(' ')[0] || '';
-      usuario.apellidos = (googleUser.nombre.split(' ')[1] || '') + ' ' + (googleUser.nombre.split(' ')[2] || '');
-      usuario.email = googleUser.email;
-      usuario.image = googleUser.image;
-      usuario.google = true;
-      usuario.password = ':)';
-      usuario.role = 'USER_ROLE';
-
-      usuario.save(async(err, usuarioCreado) => {
-        if (err) {
-          return res.status(500).json({
-            ok: false,
-            err
-          });
-        }
-
-        try {
-          const jwtToken = await generarJWT(usuarioCreado.id);
-          return res.status(200).send({
-            ok: true,
-            token: jwtToken
-          });
-        } catch (err) {
-          return res.status(400).send({
-            ok: false,
-            err
-          });
-        }
-      });
+    const { password, ...usuarioSinPassword } = result.usuario;
+    res.status(200).send({
+      ok: true,
+      token: result.token,
+      usuario: usuarioSinPassword
     });
-  } catch (e) {
-    return res.status(403).send({
-      ok: false,
-      err: e
-    });
+  } catch (e: any) {
+    if (e instanceof AppError) {
+      return res.status(e.statusCode).json({ ok: false, err: { message: e.message } });
+    }
+    res.status(403).send({ ok: false, err: e });
   }
 };
 
-const renewToken = async(req: AuthenticatedRequest, res: Response) => {
-  const id = req.id!;
-  const token = await generarJWT(id);
-  const usuario = await User.findById(id);
-
-  res.json({
-    ok: true,
-    token,
-    usuario
-  });
+const renewToken = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const id = req.id!;
+    const result = await authService.renewUserToken(id);
+    const { password, ...usuarioSinPassword } = result.usuario;
+    res.json({ ok: true, token: result.token, usuario: usuarioSinPassword });
+  } catch (err) {
+    if (err instanceof AppError) {
+      return res.status(err.statusCode).json({ ok: false, err: { message: err.message } });
+    }
+    res.status(500).json({ ok: false, err: { message: 'Error interno del servidor' } });
+  }
 };
 
-export {
-  login,
-  loginGoogle,
-  renewToken
-};
+export { login, loginGoogle, renewToken };

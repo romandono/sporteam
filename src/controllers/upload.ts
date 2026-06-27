@@ -2,15 +2,14 @@ import { Response } from 'express';
 import fs from 'fs';
 import path from 'path';
 import cloudinary from 'cloudinary';
-import User from '../models/user-models/user';
-import Club from '../models/club';
+import prisma from '../lib/prisma';
 import { AuthenticatedRequest } from '../types';
 
 const asString = (v: string | string[] | undefined): string => Array.isArray(v) ? v[0] : (v || '');
 
-let uploadFile = async(req: AuthenticatedRequest, res: Response) => {
-  let id = asString(req.params.id);
-  let tipo = asString(req.params.tipo);
+let uploadFile = async (req: AuthenticatedRequest, res: Response) => {
+  const id = asString(req.params.id);
+  const tipo = asString(req.params.tipo);
 
   if (!req.files) {
     return res.status(400).send({
@@ -19,11 +18,11 @@ let uploadFile = async(req: AuthenticatedRequest, res: Response) => {
     });
   }
 
-  let archivo = req.files.archivo as any;
-  let nombreSpliteado = archivo.name.split('.');
-  let extension = nombreSpliteado[nombreSpliteado.length - 1];
+  const archivo = req.files.archivo as any;
+  const nombreSpliteado = archivo.name.split('.');
+  const extension = nombreSpliteado[nombreSpliteado.length - 1];
 
-  let extensionesValidas = ['png', 'jpg', 'gif', 'jpeg'];
+  const extensionesValidas = ['png', 'jpg', 'gif', 'jpeg'];
   if (extensionesValidas.indexOf(extension) < 0) {
     return res.status(400).send({
       ok: false,
@@ -34,47 +33,35 @@ let uploadFile = async(req: AuthenticatedRequest, res: Response) => {
     });
   }
 
-  let nombreArchivo = `${id}-${new Date().getMilliseconds()}.${extension}`;
+  const nombreArchivo = `${id}-${new Date().getMilliseconds()}.${extension}`;
 
   await archivo.mv(`uploads/${tipo}/${nombreArchivo}`, (err: Error) => {
     if (err) {
-      return res.status(500).send({
-        ok: false,
-        err
-      });
+      return res.status(500).send({ ok: false, err });
     }
   });
 
-  cloudinary.v2.uploader.upload(`uploads/${tipo}/${nombreArchivo}`, { tags: `${tipo}` }, function(err: any, image: any) {
+  cloudinary.v2.uploader.upload(`uploads/${tipo}/${nombreArchivo}`, { tags: `${tipo}` }, async (err: any, image: any) => {
     if (err) {
-      return res.status(500).send({
-        ok: false,
-        err
-      });
+      return res.status(500).send({ ok: false, err });
     }
 
     switch (tipo) {
       case 'usuarios':
-        imagenUsuario(id, res, nombreArchivo, image.url);
+        await imagenUsuario(id, res, nombreArchivo, image.url);
         break;
       case 'clubs':
-        imagenClub(id, res, nombreArchivo, image.url);
+        await imagenClub(id, res, nombreArchivo, image.url);
         break;
     }
   });
 };
 
-let imagenUsuario = (id: string, res: Response, nombreArchivo: string, urlImagen: string) => {
-  User.findById(id, (err, usuarioDB) => {
-    if (err) {
-      borrarArchivo(nombreArchivo);
-      return res.status(500).send({
-        ok: false,
-        err
-      });
-    }
+let imagenUsuario = async (id: string, res: Response, nombreArchivo: string, urlImagen: string) => {
+  try {
+    const usuario = await prisma.user.findUnique({ where: { id } });
 
-    if (!usuarioDB) {
+    if (!usuario) {
       borrarArchivo(nombreArchivo);
       return res.status(400).send({
         ok: false,
@@ -82,31 +69,29 @@ let imagenUsuario = (id: string, res: Response, nombreArchivo: string, urlImagen
       });
     }
 
-    borrarArchivo(usuarioDB.image || '');
+    borrarArchivo(usuario.image || '');
 
-    usuarioDB.image = urlImagen;
-
-    usuarioDB.save((err, usuarioGuardado) => {
-      res.status(200).send({
-        ok: true,
-        usuario: usuarioGuardado,
-        image: urlImagen
-      });
+    const usuarioActualizado = await prisma.user.update({
+      where: { id },
+      data: { image: urlImagen }
     });
-  });
+
+    res.status(200).send({
+      ok: true,
+      usuario: usuarioActualizado,
+      image: urlImagen
+    });
+  } catch (err) {
+    borrarArchivo(nombreArchivo);
+    res.status(500).send({ ok: false, err });
+  }
 };
 
-let imagenClub = (id: string, res: Response, nombreArchivo: string, urlImagen: string) => {
-  Club.findById(id, (err, clubBD) => {
-    if (err) {
-      borrarArchivoClub(nombreArchivo);
-      return res.status(500).send({
-        ok: false,
-        err
-      });
-    }
+let imagenClub = async (id: string, res: Response, nombreArchivo: string, urlImagen: string) => {
+  try {
+    const club = await prisma.club.findUnique({ where: { id } });
 
-    if (!clubBD) {
+    if (!club) {
       borrarArchivoClub(nombreArchivo);
       return res.status(400).send({
         ok: false,
@@ -114,34 +99,36 @@ let imagenClub = (id: string, res: Response, nombreArchivo: string, urlImagen: s
       });
     }
 
-    borrarArchivoClub(clubBD.image || '');
+    borrarArchivoClub(club.image || '');
 
-    clubBD.image = urlImagen;
-
-    clubBD.save((err, clubGuardado) => {
-      res.status(200).send({
-        ok: true,
-        club: clubGuardado,
-        image: urlImagen
-      });
+    const clubActualizado = await prisma.club.update({
+      where: { id },
+      data: { image: urlImagen }
     });
-  });
+
+    res.status(200).send({
+      ok: true,
+      club: clubActualizado,
+      image: urlImagen
+    });
+  } catch (err) {
+    borrarArchivoClub(nombreArchivo);
+    res.status(500).send({ ok: false, err });
+  }
 };
 
 let borrarArchivo = (nombreImagen: string) => {
-  let pathUrlImage = path.resolve(__dirname, `../../uploads/usuarios/${nombreImagen}`);
+  const pathUrlImage = path.resolve(__dirname, `../../uploads/usuarios/${nombreImagen}`);
   if (fs.existsSync(pathUrlImage)) {
     fs.unlinkSync(pathUrlImage);
   }
 };
 
 let borrarArchivoClub = (nombreImagen: string) => {
-  let pathUrlImage = path.resolve(__dirname, `../../uploads/clubs/${nombreImagen}`);
+  const pathUrlImage = path.resolve(__dirname, `../../uploads/clubs/${nombreImagen}`);
   if (fs.existsSync(pathUrlImage)) {
     fs.unlinkSync(pathUrlImage);
   }
 };
 
-export {
-  uploadFile
-};
+export { uploadFile };

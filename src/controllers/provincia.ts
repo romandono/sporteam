@@ -1,24 +1,14 @@
 import { Response } from 'express';
-import Provincia from '../models/provincia';
 import { AuthenticatedRequest } from '../types';
+import * as provinciaService from '../services/provinciaService';
 
-let getProvincias = (req: AuthenticatedRequest, res: Response) => {
-  Provincia.find({})
-    .exec((err, provincias) => {
-      if (err) {
-        return res.status(400).send({
-          ok: false,
-          err
-        });
-      }
-
-      return res.status(200).send({
-        ok: true,
-        provincias
-      });
-    });
+let getProvincias = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const provincias = await provinciaService.getProvincias();
+    res.status(200).send({ ok: true, provincias });
+  } catch (err) {
+    res.status(400).send({ ok: false, err });
+  }
 };
 
-export {
-  getProvincias
-};
+export { getProvincias };

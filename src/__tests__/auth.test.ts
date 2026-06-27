@@ -1,7 +1,6 @@
 import request from 'supertest';
 import bcrypt from 'bcrypt';
-import { app, connectDB, disconnectDB, cleanDB } from './helpers';
-import User from '../models/user-models/user';
+import { app, connectDB, disconnectDB, cleanDB, prisma } from './helpers';
 
 describe('Auth - POST /api/login', () => {
   beforeAll(async () => { await connectDB(); });
@@ -9,14 +8,14 @@ describe('Auth - POST /api/login', () => {
   afterEach(async () => { await cleanDB(); });
 
   beforeEach(async () => {
-    const user = new User({
-      nombre: 'Test',
-      apellidos: 'User',
-      email: 'test@test.com',
-      password: bcrypt.hashSync('password123', 10),
-      role: 'USER_ROLE'
+    await prisma.user.create({
+      data: {
+        nombre: 'Test', apellidos: 'User',
+        email: 'test@test.com',
+        password: bcrypt.hashSync('password123', 10),
+        role: 'USER_ROLE'
+      }
     });
-    await user.save();
   });
 
   it('debe loguear con credenciales correctas', async () => {
@@ -56,14 +55,14 @@ describe('Auth - GET /api/login/renew', () => {
   let token: string;
 
   beforeEach(async () => {
-    const user = new User({
-      nombre: 'Test',
-      apellidos: 'User',
-      email: 'test@test.com',
-      password: bcrypt.hashSync('password123', 10),
-      role: 'USER_ROLE'
+    await prisma.user.create({
+      data: {
+        nombre: 'Test', apellidos: 'User',
+        email: 'test@test.com',
+        password: bcrypt.hashSync('password123', 10),
+        role: 'USER_ROLE'
+      }
     });
-    await user.save();
 
     const loginRes = await request(app)
       .post('/api/login')
@@ -84,8 +83,7 @@ describe('Auth - GET /api/login/renew', () => {
   });
 
   it('debe rechazar petición sin token', async () => {
-    const res = await request(app)
-      .get('/api/login/renew');
+    const res = await request(app).get('/api/login/renew');
 
     expect(res.status).toBe(401);
     expect(res.body.ok).toBe(false);

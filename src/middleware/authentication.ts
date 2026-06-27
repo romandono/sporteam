@@ -1,6 +1,6 @@
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import User from '../models/user-models/user';
+import prisma from '../lib/prisma';
 import { AuthenticatedRequest, JwtPayload } from '../types';
 
 const extractToken = (req: AuthenticatedRequest): string | undefined => {
@@ -32,7 +32,7 @@ let verificarToken = (req: AuthenticatedRequest, res: Response, next: NextFuncti
     const payload = decoded as JwtPayload;
     req.id = payload.id;
 
-    User.findById(payload.id)
+    prisma.user.findUnique({ where: { id: payload.id } })
       .then(usuario => {
         if (!usuario) {
           return res.status(401).send({

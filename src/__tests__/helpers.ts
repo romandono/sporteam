@@ -1,28 +1,23 @@
-import mongoose from 'mongoose';
-import * as fs from 'fs';
-import * as path from 'path';
+import prisma from '../lib/prisma';
 import app from '../app';
 
-const CONFIG_PATH = path.resolve(__dirname, '../../.mongodb-uri.json');
-
 const connectDB = async () => {
-  if (!process.env.DB_CNN) {
-    const data = JSON.parse(fs.readFileSync(CONFIG_PATH, 'utf-8'));
-    process.env.DB_CNN = data.uri;
-  }
-  await mongoose.connect(process.env.DB_CNN || '');
-  (mongoose as any).Promise = global.Promise;
+  await prisma.$connect();
 };
 
 const disconnectDB = async () => {
-  await mongoose.disconnect();
+  await prisma.$disconnect();
 };
 
+const TABLES = [
+  'user_zonas', 'estadisticas', 'jugadores', 'entrenadores',
+  'users', 'clubs', 'temporadas', 'provincias', 'zonas', 'localidades'
+];
+
 const cleanDB = async () => {
-  const collections = mongoose.connection.collections;
-  for (const key in collections) {
-    await collections[key].deleteMany({});
+  for (const table of TABLES) {
+    await prisma.$executeRawUnsafe(`TRUNCATE TABLE "${table}" CASCADE`);
   }
 };
 
-export { app, connectDB, disconnectDB, cleanDB };
+export { app, connectDB, disconnectDB, cleanDB, prisma };

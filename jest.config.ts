@@ -28,8 +28,6 @@ const config: Config = {
     }
   },
   verbose: true,
-  globalSetup: '<rootDir>/src/__tests__/globalSetup.ts',
-  globalTeardown: '<rootDir>/src/__tests__/globalTeardown.ts',
   setupFiles: ['<rootDir>/src/__tests__/env-setup.ts'],
   testTimeout: 60000
 };

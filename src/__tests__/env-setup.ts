@@ -1,3 +1,4 @@
-// Override env before app module loads
-process.env.DB_CNN = '';
+import dotenv from 'dotenv';
+dotenv.config();
+
 process.env.JWT_SECRET = process.env.JWT_SECRET || 'test-jwt-secret';

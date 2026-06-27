@@ -1,0 +1,21 @@
+services:
+  - type: web
+    name: sporteam-api
+    runtime: docker
+    repo: https://github.com/romandono/sporteam
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    envVars:
+      - key: PORT
+        value: "3000"
+      - key: DATABASE_URL
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CLIENT_ID
+        sync: false
+      - key: CLOUDINARY_URL
+        sync: false
+      - key: LOG_LEVEL
+        value: info

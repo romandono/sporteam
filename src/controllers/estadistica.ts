@@ -1,34 +1,22 @@
 import { Response } from 'express';
-import Estadistica from '../models/estadistica';
 import { AuthenticatedRequest } from '../types';
+import * as estadisticaService from '../services/estadisticaService';
+import { AppError } from '../middleware/errorHandler';
 
 const asString = (v: string | string[] | undefined): string => Array.isArray(v) ? v[0] : (v || '');
 
-let getEstadistica = (req: AuthenticatedRequest, res: Response) => {
-  let id = asString(req.params.id);
+let getEstadistica = async (req: AuthenticatedRequest, res: Response) => {
+  try {
+    const id = asString(req.params.id);
+    const estadistica = await estadisticaService.getEstadisticaById(id);
 
-  Estadistica.findById(id, (err, estadistica) => {
-    if (err) {
-      return res.status(400).json({
-        ok: false,
-        err
-      });
+    res.status(200).json({ ok: true, estadistica });
+  } catch (err) {
+    if (err instanceof AppError) {
+      return res.status(err.statusCode).json({ ok: false, message: err.message });
     }
-
-    if (!estadistica) {
-      return res.status(400).json({
-        ok: false,
-        message: 'No existe la estadistica'
-      });
-    }
-
-    res.status(200).json({
-      ok: true,
-      estadistica
-    });
-  });
+    res.status(400).json({ ok: false, err });
+  }
 };
 
-export {
-  getEstadistica
-};
+export { getEstadistica };

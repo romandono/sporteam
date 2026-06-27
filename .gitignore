@@ -5,3 +5,4 @@ coverage/
 *.js.map
 .mongodb-uri.json
 .env
+/src/generated/prisma

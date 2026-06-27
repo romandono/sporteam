@@ -1,20 +1,18 @@
-import mongoose from 'mongoose';
-import colors from 'colors/safe';
+import './config/config';
+import dotenv from 'dotenv';
+dotenv.config();
+
 import app from './app';
+import prisma from './lib/prisma';
 
 const port = process.env.PORT || 3000;
 
-(mongoose as any).Promise = global.Promise;
-mongoose.connect(process.env.DB_CNN || '', {
-  useNewUrlParser: true,
-  useCreateIndex: true,
-  useUnifiedTopology: true
-} as any)
+prisma.$connect()
   .then(() => {
-    console.log(colors.green('Base de datos conectada'));
+    console.log('Base de datos conectada');
 
     app.listen(port, () => {
-      console.log(colors.green(`Servidor escuchando en el puerto ${port}`));
+      console.log(`Servidor escuchando en el puerto ${port}`);
     });
   })
   .catch(err => console.log(err));

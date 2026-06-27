@@ -6,10 +6,12 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
+COPY prisma.config.ts ./
+COPY prisma/ ./prisma/
 COPY tsconfig.json ./
 COPY src/ ./src/
 
-RUN npm run build
+RUN npx prisma generate && npm run build
 
 # Stage 2: Production
 FROM node:20-alpine AS production
@@ -22,12 +24,13 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 
 COPY --from=build /app/dist ./dist
-COPY server/public ./server/public
-COPY server/assets ./server/assets
+COPY --from=build /app/node_modules/.prisma ./node_modules/.prisma
+COPY --from=build /app/prisma ./prisma
+COPY public ./public
 
 EXPOSE 3000
 
 USER node
 
 ENTRYPOINT ["/sbin/tini", "--"]
-CMD ["node", "dist/server.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy --schema=prisma/schema.prisma && node dist/server.js"]

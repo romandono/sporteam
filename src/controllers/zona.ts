@@ -1,10 +1,10 @@
 import { Response } from 'express';
-import Zona from '../models/zona';
 import { AuthenticatedRequest } from '../types';
+import * as zonaService from '../services/zonaService';
 
-let getZonas = async(req: AuthenticatedRequest, res: Response) => {
+let getZonas = async (req: AuthenticatedRequest, res: Response) => {
   try {
-    let zonas = await Zona.find({});
+    const zonas = await zonaService.getZonas();
 
     if (!zonas) {
       return res.status(400).send({
@@ -13,18 +13,10 @@ let getZonas = async(req: AuthenticatedRequest, res: Response) => {
       });
     }
 
-    res.json({
-      ok: true,
-      zonas
-    });
+    res.json({ ok: true, zonas });
   } catch (err) {
-    res.status(400).send({
-      ok: false,
-      err
-    });
+    res.status(400).send({ ok: false, err });
   }
 };
 
-export {
-  getZonas
-};
+export { getZonas };

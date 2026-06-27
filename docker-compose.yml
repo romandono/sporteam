@@ -1,16 +1,18 @@
 version: '3.8'
 
 services:
-  mongodb:
-    image: mongo:7
-    container_name: sporteam-mongo
+  postgres:
+    image: postgres:16-alpine
+    container_name: sporteam-postgres
     restart: unless-stopped
     ports:
-      - "27017:27017"
+      - "5432:5432"
     volumes:
-      - mongo-data:/data/db
+      - postgres-data:/var/lib/postgresql/data
     environment:
-      MONGO_INITDB_DATABASE: sporteam
+      POSTGRES_DB: sporteam
+      POSTGRES_USER: sporteam
+      POSTGRES_PASSWORD: sporteam_pass
 
   app:
     build:
@@ -22,12 +24,12 @@ services:
       - "3000:3000"
     environment:
       PORT: "3000"
-      DB_CNN: "mongodb://mongodb:27017/sporteam?retryWrites=true"
+      DATABASE_URL: "postgresql://sporteam:sporteam_pass@postgres:5432/sporteam"
       JWT_SECRET: "${JWT_SECRET:-cambia-esta-secret-key-en-produccion}"
       CLIENT_ID: "${CLIENT_ID:-}"
       CLOUDINARY_URL: "${CLOUDINARY_URL:-}"
     depends_on:
-      - mongodb
+      - postgres
 
 volumes:
-  mongo-data:
+  postgres-data:

@@ -1,0 +1,147 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  ADMIN_ROLE
+  USER_ROLE
+  JUGADOR_ROLE
+  ENTRENADOR_ROLE
+  CLUB_ROLE
+}
+
+model User {
+  id              String   @id @default(uuid())
+  role            Role
+  nombre          String
+  apellidos       String
+  email           String   @unique
+  password        String
+  estado          Boolean  @default(true)
+  image           String?
+  google          Boolean  @default(false)
+  estadoDeportivo String?  @map("estado_deportivo")
+  clubId          String?  @map("club_id")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  club         Club?         @relation(fields: [clubId], references: [id])
+  jugador      Jugador?
+  entrenador   Entrenador?
+  zonas        UserZona[]
+  estadisticas Estadistica[]
+
+  @@map("users")
+}
+
+model Jugador {
+  userId          String    @id @map("user_id")
+  nombreDeportivo String?   @map("nombre_deportivo")
+  fechaNacimiento DateTime? @map("fecha_nacimiento")
+  lateralidad     String?
+  demarcacion     String[]
+  altura          Decimal?  @db.Decimal(5, 2)
+  peso            Decimal?  @db.Decimal(5, 2)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("jugadores")
+}
+
+model Entrenador {
+  userId             String   @id @map("user_id")
+  nombreDeportivo    String?  @map("nombre_deportivo")
+  entrenadorPorteros Boolean  @default(false) @map("entrenador_porteros")
+  titulacion         String[]
+  telefono           String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("entrenadores")
+}
+
+model Club {
+  id          String   @id @default(uuid())
+  nombre      String
+  localidad   String?
+  provinciaId String?  @map("provincia_id")
+  modalidad   String?
+  image       String?
+  zonaId      String?  @map("zona_id")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  provincia Provincia? @relation(fields: [provinciaId], references: [id])
+  zona      Zona?      @relation(fields: [zonaId], references: [id])
+  usuarios  User[]
+
+  @@map("clubs")
+}
+
+model Estadistica {
+  id                String @id @default(uuid())
+  jugadorId         String @map("jugador_id")
+  temporadaId       String @map("temporada_id")
+  partidosJugados   Int    @default(0) @map("partidos_jugados")
+  goles             Int    @default(0)
+  asistencias       Int    @default(0)
+  tarjetasAmarillas Int    @default(0) @map("tarjetas_amarillas")
+  tarjetasRojas     Int    @default(0) @map("tarjetas_rojas")
+
+  jugador   User      @relation(fields: [jugadorId], references: [id])
+  temporada Temporada @relation(fields: [temporadaId], references: [id])
+
+  @@unique([jugadorId, temporadaId])
+  @@map("estadisticas")
+}
+
+model Temporada {
+  id   String @id @default(uuid())
+  anho String @unique
+
+  estadisticas Estadistica[]
+
+  @@map("temporadas")
+}
+
+model Provincia {
+  id     String @id @default(uuid())
+  nombre String @unique
+
+  clubs Club[]
+
+  @@map("provincias")
+}
+
+model Zona {
+  id         String @id @default(uuid())
+  nombreZona String @unique @map("nombre_zona")
+
+  clubs    Club[]
+  usuarios UserZona[]
+
+  @@map("zonas")
+}
+
+model Localidad {
+  id     String @id @default(uuid())
+  nombre String
+
+  @@map("localidades")
+}
+
+model UserZona {
+  userId String @map("user_id")
+  zonaId String @map("zona_id")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  zona Zona @relation(fields: [zonaId], references: [id], onDelete: Cascade)
+
+  @@id([userId, zonaId])
+  @@map("user_zonas")
+}

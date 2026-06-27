@@ -1,5 +1,3 @@
-import './config/config';
-import dotenv from 'dotenv';
 import express from 'express';
 import bodyParser from 'body-parser';
 import path from 'path';
@@ -20,8 +18,6 @@ import zonaRoutes from './routes/zona';
 import estadisticaRoutes from './routes/estadistica';
 import { errorHandler } from './middleware/errorHandler';
 import logger from './helpers/logger';
-
-dotenv.config();
 
 const app = express();
 
@@ -53,7 +49,7 @@ app.use((req, res, next) => {
   next();
 });
 
-const publicPath = path.resolve(__dirname, '../server/public');
+const publicPath = path.resolve(__dirname, '../public');
 app.use(express.static(publicPath));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
