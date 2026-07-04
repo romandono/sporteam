@@ -16,7 +16,7 @@ describe('Entrenadores - CRUD', () => {
         email: 'entrenador@test.com',
         password: bcrypt.hashSync('pass123', 10),
         role: 'ENTRENADOR_ROLE',
-        entrenador: { create: {} }
+        perfiles: { create: { profileType: 'ENTRENADOR' } }
       }
     });
 
