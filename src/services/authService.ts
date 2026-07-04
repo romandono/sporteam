@@ -20,7 +20,7 @@ export const loginUser = async (email: string, password: string) => {
 export const renewUserToken = async (id: string) => {
   const usuario = await prisma.user.findUnique({
     where: { id },
-    include: { jugador: true, entrenador: true }
+    include: { perfiles: true }
   });
   if (!usuario) {
     throw new AppError('Usuario no encontrado', 404);
