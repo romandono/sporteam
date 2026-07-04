@@ -1,222 +1,190 @@
-import bcrypt from 'bcrypt';
+import * as profileService from './profileService';
 import prisma from '../lib/prisma';
 import { AppError } from '../middleware/errorHandler';
+import { ProfileType } from '../generated/prisma/enums';
 
-// ── Shared helpers ──────────────────────────────────────────
+// ─── Response mappers ────────────────────────────────────────────────────────
 
-const userSelect = {
-  id: true, nombre: true, apellidos: true, email: true,
-  role: true, estado: true, image: true, google: true,
-  estadoDeportivo: true, clubId: true, createdAt: true, updatedAt: true,
-};
+interface JugadorNested {
+  id: string;
+  userId: string;
+  nombreDeportivo: string | null;
+  fechaNacimiento: Date | null;
+  lateralidad: string | null;
+  demarcacion: string[];
+  altura: number | null;
+  peso: number | null;
+}
 
-function jugadorResponse(profile: any) {
-  const { user, nombreDeportivo, fechaNacimiento, lateralidad, demarcacion, altura, peso, ...rest } = profile;
+interface EntrenadorNested {
+  id: string;
+  userId: string;
+  nombreDeportivo: string | null;
+  telefono: string | null;
+  fechaNacimiento: Date | null;
+  entrenadorPorteros: boolean;
+  titulacion: string[];
+}
+
+function jugadorResponse(profile: any): any {
+  const u = profile.user;
   return {
-    ...(user || rest),
-    jugador: { nombreDeportivo, fechaNacimiento, lateralidad, demarcacion, altura, peso },
+    id: u?.id ?? profile.userId,
+    nombre: u?.nombre,
+    apellidos: u?.apellidos,
+    email: u?.email,
+    role: u?.role,
+    estado: u?.estado,
+    image: u?.image,
+    google: u?.google,
+    estadoDeportivo: u?.estadoDeportivo,
+    clubId: u?.clubId,
+    createdAt: u?.createdAt,
+    updatedAt: u?.updatedAt,
+    jugador: {
+      id: profile.id,
+      userId: profile.userId,
+      nombreDeportivo: profile.nombreDeportivo,
+      fechaNacimiento: profile.fechaNacimiento,
+      lateralidad: profile.lateralidad,
+      demarcacion: profile.demarcacion,
+      altura: profile.altura ? Number(profile.altura) : null,
+      peso: profile.peso ? Number(profile.peso) : null
+    } as JugadorNested,
+    estadisticas: profile.estadisticas ?? []
   };
 }
 
-function entrenadorResponse(profile: any) {
-  const { user, nombreDeportivo, telefono, entrenadorPorteros, titulacion, ...rest } = profile;
+function entrenadorResponse(profile: any): any {
+  const u = profile.user;
   return {
-    ...(user || rest),
-    entrenador: { nombreDeportivo, telefono, entrenadorPorteros, titulacion },
+    id: u?.id ?? profile.userId,
+    nombre: u?.nombre,
+    apellidos: u?.apellidos,
+    email: u?.email,
+    role: u?.role,
+    estado: u?.estado,
+    image: u?.image,
+    google: u?.google,
+    estadoDeportivo: u?.estadoDeportivo,
+    clubId: u?.clubId,
+    createdAt: u?.createdAt,
+    updatedAt: u?.updatedAt,
+    entrenador: {
+      id: profile.id,
+      userId: profile.userId,
+      nombreDeportivo: profile.nombreDeportivo,
+      telefono: profile.telefono,
+      fechaNacimiento: profile.fechaNacimiento,
+      entrenadorPorteros: profile.entrenadorPorteros,
+      titulacion: profile.titulacion
+    } as EntrenadorNested,
+    club: u?.club ?? undefined
   };
 }
 
-// ── Jugador adapter functions ───────────────────────────────
+// ─── Jugador adapter functions (backward compat) ────────────────────────────
 
 export const getJugadores = async (desde = 0, limite = 5) => {
-  const [profiles, total] = await Promise.all([
-    prisma.profile.findMany({
-      where: { profileType: 'JUGADOR' },
-      include: { user: { select: userSelect }, estadisticas: { include: { temporada: true } } },
-      skip: desde, take: limite, orderBy: { createdAt: 'desc' },
-    }),
-    prisma.profile.count({ where: { profileType: 'JUGADOR' } }),
-  ]);
+  const { profiles, total } = await profileService.getProfiles(ProfileType.JUGADOR, { desde, limite });
   return { jugadores: profiles.map(jugadorResponse), total };
 };
 
-export const searchJugadores = async (termino: string) => {
-  const profiles = await prisma.profile.findMany({
-    where: { profileType: 'JUGADOR', user: { nombre: { contains: termino, mode: 'insensitive' } } },
-    include: { user: { select: userSelect }, estadisticas: { include: { temporada: true } } },
-  });
-  return profiles.map(jugadorResponse);
-};
-
 export const getJugadorById = async (id: string) => {
-  const profile = await prisma.profile.findUnique({
-    where: { id },
-    include: { user: { select: userSelect }, estadisticas: { include: { temporada: true } } },
-  });
-  if (!profile || profile.profileType !== 'JUGADOR') throw new AppError('Jugador no encontrado', 404);
+  const profile = await profileService.getProfileByUserId(id, ProfileType.JUGADOR);
   return jugadorResponse(profile);
 };
 
-export const getJugadoresByZona = async (idZona: string, desde = 0, limite = 5) => {
-  const jugadores = await prisma.profile.findMany({
-    where: { profileType: 'JUGADOR', user: { zonas: { some: { zonaId: idZona } } } },
-    include: { user: { select: userSelect }, estadisticas: { include: { temporada: true } } },
-    skip: desde, take: limite, orderBy: { createdAt: 'desc' },
-  });
-  const total = await prisma.profile.count({
-    where: { profileType: 'JUGADOR', user: { zonas: { some: { zonaId: idZona } } } },
-  });
-  return { jugadores: jugadores.map(jugadorResponse), total };
-};
-
-export const createJugador = async (params: any) => {
-  const profile = await prisma.profile.create({
-    data: {
-      profileType: 'JUGADOR',
-      nombreDeportivo: params.nombreDeportivo,
-      fechaNacimiento: params.fechaNacimiento ? new Date(params.fechaNacimiento) : undefined,
-      lateralidad: params.lateralidad,
-      demarcacion: params.demarcacion || [],
-      altura: params.altura,
-      peso: params.peso,
-      user: {
-        create: {
-          nombre: params.nombre, apellidos: params.apellidos,
-          email: params.email, password: bcrypt.hashSync(params.password, 10),
-          role: 'JUGADOR_ROLE', estado: true,
-          estadoDeportivo: params.estadoDeportivo, clubId: params.clubId,
-          zonas: params.zonas?.length
-            ? { create: params.zonas.map((zonaId: string) => ({ zonaId })) }
-            : undefined,
-        },
-      },
-    },
-    include: { user: { select: userSelect }, estadisticas: { include: { temporada: true } } },
+export const createJugador = async (data: any) => {
+  const profile = await profileService.createProfile({
+    profileType: ProfileType.JUGADOR,
+    nombre: data.nombre,
+    apellidos: data.apellidos,
+    email: data.email,
+    password: data.password,
+    role: data.role,
+    estadoDeportivo: data.estadoDeportivo,
+    clubId: data.clubId,
+    zonas: data.zonas,
+    nombreDeportivo: data.nombreDeportivo,
+    fechaNacimiento: data.fechaNacimiento,
+    lateralidad: data.lateralidad,
+    demarcacion: data.demarcacion,
+    altura: data.altura,
+    peso: data.peso
   });
   return jugadorResponse(profile);
 };
 
 export const updateJugador = async (id: string, body: any) => {
-  const profile = await prisma.profile.findUnique({ where: { id }, select: { userId: true } });
-  if (!profile) throw new AppError('Jugador no encontrado', 404);
-
-  const allowedUserFields = ['nombre', 'apellidos', 'email', 'image', 'estado', 'estadoDeportivo', 'clubId'];
-  const userData: any = {};
-  for (const f of allowedUserFields) if (body[f] !== undefined) userData[f] = body[f];
-  if (Object.keys(userData).length > 0) {
-    await prisma.user.update({ where: { id: profile.userId }, data: userData });
-  }
-
-  const allowedProfileFields = ['nombreDeportivo', 'lateralidad', 'demarcacion', 'altura', 'peso'];
-  const profileData: any = {};
-  for (const f of allowedProfileFields) if (body[f] !== undefined) profileData[f] = body[f];
-  if (body.fechaNacimiento !== undefined) profileData.fechaNacimiento = new Date(body.fechaNacimiento);
-  if (Object.keys(profileData).length > 0) {
-    await prisma.profile.update({ where: { id }, data: profileData });
-  }
-
-  if (body.zonas) {
-    await prisma.userZona.deleteMany({ where: { userId: profile.userId } });
-    if (body.zonas.length > 0) {
-      await prisma.userZona.createMany({ data: body.zonas.map((zonaId: string) => ({ userId: profile.userId, zonaId })) });
-    }
-  }
-
-  return await getJugadorById(id);
+  const profile = await profileService.getProfileByUserId(id, ProfileType.JUGADOR);
+  const updated = await profileService.updateProfile(profile.id, body);
+  return jugadorResponse(updated);
 };
 
-// ── Entrenador adapter functions ────────────────────────────
+export const searchJugadores = async (termino: string) => {
+  const profiles = await profileService.searchProfiles(ProfileType.JUGADOR, termino);
+  return profiles.map(jugadorResponse);
+};
+
+export const getJugadoresByZona = async (idZona: string, desde = 0, limite = 5) => {
+  const { profiles, total } = await profileService.getProfilesByZona(ProfileType.JUGADOR, idZona, desde, limite);
+  return { jugadores: profiles.map(jugadorResponse), total };
+};
+
+// ─── Entrenador adapter functions (backward compat) ─────────────────────────
 
 export const getEntrenadores = async (desde = 0, limite = 20) => {
-  const [profiles, total] = await Promise.all([
-    prisma.profile.findMany({
-      where: { profileType: 'ENTRENADOR', user: { estado: true } },
-      include: { user: { select: userSelect } },
-      skip: desde, take: limite, orderBy: { createdAt: 'desc' },
-    }),
-    prisma.profile.count({ where: { profileType: 'ENTRENADOR', user: { estado: true } } }),
-  ]);
+  const { profiles, total } = await profileService.getProfiles(ProfileType.ENTRENADOR, { desde, limite, onlyActive: true });
   return { entrenadores: profiles.map(entrenadorResponse), total };
 };
 
-export const searchEntrenadores = async (termino: string) => {
-  const profiles = await prisma.profile.findMany({
-    where: { profileType: 'ENTRENADOR', user: { nombre: { contains: termino, mode: 'insensitive' } } },
-    include: { user: { select: userSelect } },
-  });
-  return profiles.map(entrenadorResponse);
-};
-
 export const getEntrenadorById = async (id: string) => {
-  const profile = await prisma.profile.findUnique({
-    where: { id },
-    include: { user: { select: { ...userSelect, club: true } } },
+  // Use direct Prisma call to include club (matches old service behavior)
+  const profile = await prisma.profile.findFirst({
+    where: { userId: id, profileType: ProfileType.ENTRENADOR },
+    include: {
+      user: { include: { club: true } },
+      estadisticas: { include: { temporada: true } }
+    }
   });
-  if (!profile || profile.profileType !== 'ENTRENADOR') throw new AppError('Entrenador no encontrado', 404);
+  if (!profile) {
+    throw new AppError('Entrenador no encontrado', 404);
+  }
   return entrenadorResponse(profile);
 };
 
-export const getEntrenadoresByZona = async (idZona: string, desde = 0, limite = 5) => {
-  const entrenadores = await prisma.profile.findMany({
-    where: { profileType: 'ENTRENADOR', user: { estado: true, zonas: { some: { zonaId: idZona } } } },
-    include: { user: { select: userSelect } },
-    skip: desde, take: limite, orderBy: { createdAt: 'desc' },
-  });
-  const total = await prisma.profile.count({
-    where: { profileType: 'ENTRENADOR', user: { estado: true, zonas: { some: { zonaId: idZona } } } },
-  });
-  return { entrenadores: entrenadores.map(entrenadorResponse), total };
-};
-
-export const createEntrenador = async (params: any) => {
-  const profile = await prisma.profile.create({
-    data: {
-      profileType: 'ENTRENADOR',
-      nombreDeportivo: params.nombreDeportivo,
-      entrenadorPorteros: params.entrenadorPorteros || false,
-      titulacion: params.titulacion || [],
-      telefono: params.telefono,
-      user: {
-        create: {
-          nombre: params.nombre, apellidos: params.apellidos,
-          email: params.email, password: bcrypt.hashSync(params.password, 10),
-          role: 'ENTRENADOR_ROLE', estado: true,
-          estadoDeportivo: params.estadoDeportivo, clubId: params.clubId,
-          zonas: params.zonas?.length
-            ? { create: params.zonas.map((zonaId: string) => ({ zonaId })) }
-            : undefined,
-        },
-      },
-    },
-    include: { user: { select: userSelect } },
+export const createEntrenador = async (data: any) => {
+  const profile = await profileService.createProfile({
+    profileType: ProfileType.ENTRENADOR,
+    nombre: data.nombre,
+    apellidos: data.apellidos,
+    email: data.email,
+    password: data.password,
+    role: data.role,
+    estadoDeportivo: data.estadoDeportivo,
+    clubId: data.clubId,
+    zonas: data.zonas,
+    nombreDeportivo: data.nombreDeportivo,
+    entrenadorPorteros: data.entrenadorPorteros,
+    titulacion: data.titulacion,
+    telefono: data.telefono
   });
   return entrenadorResponse(profile);
 };
 
 export const updateEntrenador = async (id: string, body: any) => {
-  const profile = await prisma.profile.findUnique({ where: { id }, select: { userId: true } });
-  if (!profile) throw new AppError('Entrenador no encontrado', 404);
+  const profile = await profileService.getProfileByUserId(id, ProfileType.ENTRENADOR);
+  const updated = await profileService.updateProfile(profile.id, body);
+  return entrenadorResponse(updated);
+};
 
-  const allowedUserFields = ['nombre', 'apellidos', 'email', 'image', 'estado', 'estadoDeportivo', 'clubId'];
-  const userData: any = {};
-  for (const f of allowedUserFields) if (body[f] !== undefined) userData[f] = body[f];
-  if (Object.keys(userData).length > 0) {
-    await prisma.user.update({ where: { id: profile.userId }, data: userData });
-  }
+export const searchEntrenadores = async (termino: string) => {
+  const profiles = await profileService.searchProfiles(ProfileType.ENTRENADOR, termino);
+  return profiles.map(entrenadorResponse);
+};
 
-  const allowedProfileFields = ['nombreDeportivo', 'entrenadorPorteros', 'titulacion', 'telefono'];
-  const profileData: any = {};
-  for (const f of allowedProfileFields) if (body[f] !== undefined) profileData[f] = body[f];
-  if (Object.keys(profileData).length > 0) {
-    await prisma.profile.update({ where: { id }, data: profileData });
-  }
-
-  if (body.zonas) {
-    await prisma.userZona.deleteMany({ where: { userId: profile.userId } });
-    if (body.zonas.length > 0) {
-      await prisma.userZona.createMany({ data: body.zonas.map((zonaId: string) => ({ userId: profile.userId, zonaId })) });
-    }
-  }
-
-  return await getEntrenadorById(id);
+export const getEntrenadoresByZona = async (idZona: string, desde = 0, limite = 5) => {
+  const { profiles, total } = await profileService.getProfilesByZona(ProfileType.ENTRENADOR, idZona, desde, limite);
+  return { entrenadores: profiles.map(entrenadorResponse), total };
 };
