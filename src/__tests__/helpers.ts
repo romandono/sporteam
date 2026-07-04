@@ -10,7 +10,7 @@ const disconnectDB = async () => {
 };
 
 const TABLES = [
-  'user_zonas', 'estadisticas', 'jugadores', 'entrenadores',
+  'user_zonas', 'estadisticas', 'perfiles',
   'users', 'clubs', 'temporadas', 'provincias', 'zonas', 'localidades'
 ].map(t => `"${t}"`).join(', ');
 

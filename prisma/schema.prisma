@@ -15,6 +15,15 @@ enum Role {
   CLUB_ROLE
 }
 
+enum ProfileType {
+  JUGADOR
+  ENTRENADOR
+  PREPARADOR
+  MEDICO
+  DIRECTIVO
+  OJEADOR
+}
+
 model User {
   id              String   @id @default(uuid())
   role            Role
@@ -31,38 +40,35 @@ model User {
   updatedAt       DateTime @updatedAt @map("updated_at")
 
   club         Club?         @relation(fields: [clubId], references: [id])
-  jugador      Jugador?
-  entrenador   Entrenador?
+  perfiles     Profile[]
   zonas        UserZona[]
-  estadisticas Estadistica[]
 
   @@map("users")
 }
 
-model Jugador {
-  userId          String    @id @map("user_id")
-  nombreDeportivo String?   @map("nombre_deportivo")
-  fechaNacimiento DateTime? @map("fecha_nacimiento")
-  lateralidad     String?
-  demarcacion     String[]
-  altura          Decimal?  @db.Decimal(5, 2)
-  peso            Decimal?  @db.Decimal(5, 2)
+model Profile {
+  id               String       @id @default(uuid())
+  userId           String       @map("user_id")
+  profileType      ProfileType  @map("profile_type")
+  nombreDeportivo  String?      @map("nombre_deportivo")
+  telefono         String?
+  fechaNacimiento  DateTime?    @map("fecha_nacimiento")
+  lateralidad      String?
+  demarcacion      String[]
+  altura           Decimal?     @db.Decimal(5, 2)
+  peso             Decimal?     @db.Decimal(5, 2)
+  entrenadorPorteros Boolean    @default(false) @map("entrenador_porteros")
+  titulacion       String[]
+  localidadId      String?      @map("localidad_id")
+  metadata         Json?
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  localidad    Localidad?     @relation(fields: [localidadId], references: [id])
+  estadisticas Estadistica[]
 
-  @@map("jugadores")
-}
-
-model Entrenador {
-  userId             String   @id @map("user_id")
-  nombreDeportivo    String?  @map("nombre_deportivo")
-  entrenadorPorteros Boolean  @default(false) @map("entrenador_porteros")
-  titulacion         String[]
-  telefono           String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@map("entrenadores")
+  @@map("perfiles")
 }
 
 model Club {
@@ -85,7 +91,7 @@ model Club {
 
 model Estadistica {
   id                String @id @default(uuid())
-  jugadorId         String @map("jugador_id")
+  profileId         String @map("profile_id")
   temporadaId       String @map("temporada_id")
   partidosJugados   Int    @default(0) @map("partidos_jugados")
   goles             Int    @default(0)
@@ -93,10 +99,10 @@ model Estadistica {
   tarjetasAmarillas Int    @default(0) @map("tarjetas_amarillas")
   tarjetasRojas     Int    @default(0) @map("tarjetas_rojas")
 
-  jugador   User      @relation(fields: [jugadorId], references: [id])
+  profile   Profile   @relation(fields: [profileId], references: [id], onDelete: Cascade)
   temporada Temporada @relation(fields: [temporadaId], references: [id])
 
-  @@unique([jugadorId, temporadaId])
+  @@unique([profileId, temporadaId])
   @@map("estadisticas")
 }
 
@@ -129,8 +135,10 @@ model Zona {
 }
 
 model Localidad {
-  id     String @id @default(uuid())
-  nombre String
+  id       String    @id @default(uuid())
+  nombre   String
+
+  perfiles Profile[]
 
   @@map("localidades")
 }

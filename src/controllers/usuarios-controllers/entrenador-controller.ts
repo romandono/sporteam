@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../../types';
-import * as entrenadorService from '../../services/entrenadorService';
+import * as entrenadorService from '../../services/profileAdapter';
 import { AppError } from '../../middleware/errorHandler';
 
 const asString = (v: string | string[] | undefined): string => Array.isArray(v) ? v[0] : (v || '');
