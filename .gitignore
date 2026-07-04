@@ -6,3 +6,5 @@ coverage/
 .mongodb-uri.json
 .env
 /src/generated/prisma
+.atl
+.codegraph
