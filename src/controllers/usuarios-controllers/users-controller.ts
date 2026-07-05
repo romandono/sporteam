@@ -1,9 +1,8 @@
-import fs from 'fs';
-import path from 'path';
 import { Response } from 'express';
 import { AuthenticatedRequest } from '../../types';
 import * as userService from '../../services/userService';
 import { AppError } from '../../middleware/errorHandler';
+import { R2_PUBLIC_URL_PREFIX } from '../../lib/r2';
 
 let getUsuarios = async (req: AuthenticatedRequest, res: Response) => {
   try {
@@ -73,16 +72,9 @@ let deleteUser = async (req: AuthenticatedRequest, res: Response) => {
 };
 
 let getUserImage = (req: AuthenticatedRequest, res: Response) => {
-  const foto = req.params.foto;
   const tipo = req.params.tipo;
-  const pathImage = path.resolve(__dirname, `../../../uploads/${tipo}/${foto}`);
-
-  if (fs.existsSync(pathImage)) {
-    res.sendFile(pathImage);
-  } else {
-    const pathNoImage = path.join(__dirname, `../../../uploads/${tipo}/no-image.jpg`);
-    res.sendFile(pathNoImage);
-  }
+  const foto = req.params.foto;
+  res.redirect(`${R2_PUBLIC_URL_PREFIX}/${tipo}/${foto}`);
 };
 
 export { getUsuarios, getUsuario, saveUser, updateUser, deleteUser, getUserImage };

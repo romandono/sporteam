@@ -1,11 +1,94 @@
 import { Response } from 'express';
-import fs from 'fs';
-import path from 'path';
-import cloudinary from 'cloudinary';
+import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import r2, { R2_BUCKET, R2_PUBLIC_URL_PREFIX } from '../lib/r2';
 import prisma from '../lib/prisma';
 import { AuthenticatedRequest } from '../types';
 
-const asString = (v: string | string[] | undefined): string => Array.isArray(v) ? v[0] : (v || '');
+interface UploadedFile {
+  name: string;
+  data: Buffer;
+}
+
+const asString = (v: string | string[] | undefined): string =>
+  Array.isArray(v) ? v[0] : v || '';
+
+const EXTENSIONES_VALIDAS = ['png', 'jpg', 'gif', 'jpeg'];
+
+const contentTypeMap: Record<string, string> = {
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+  gif: 'image/gif',
+};
+
+const getContentType = (ext: string): string =>
+  contentTypeMap[ext] || 'application/octet-stream';
+
+const uploadToR2 = async (buffer: Buffer, key: string, contentType: string) => {
+  await r2.send(
+    new PutObjectCommand({
+      Bucket: R2_BUCKET,
+      Key: key,
+      Body: buffer,
+      ContentType: contentType,
+    }),
+  );
+};
+
+const deleteFromR2 = async (key: string) => {
+  try {
+    await r2.send(
+      new DeleteObjectCommand({ Bucket: R2_BUCKET, Key: key }),
+    );
+  } catch (err) {
+    console.error('Error deleting from R2:', err);
+  }
+};
+
+const extractKeyFromUrl = (url: string): string | null => {
+  if (!url || !url.startsWith(R2_PUBLIC_URL_PREFIX)) return null;
+  return url.slice(R2_PUBLIC_URL_PREFIX.length + 1);
+};
+
+const updateEntityImage = async (
+  model: { findUnique: Function; update: Function },
+  id: string,
+  key: string,
+  urlImagen: string,
+  entityKey: string,
+  res: Response,
+) => {
+  try {
+    const entity = await model.findUnique({ where: { id } });
+
+    if (!entity) {
+      await deleteFromR2(key);
+      return res.status(400).send({
+        ok: false,
+        err: { message: `La entidad no existe` },
+      });
+    }
+
+    const oldKey = extractKeyFromUrl(entity.image || '');
+    if (oldKey) {
+      await deleteFromR2(oldKey);
+    }
+
+    const updated = await model.update({
+      where: { id },
+      data: { image: urlImagen },
+    });
+
+    return res.status(200).send({
+      ok: true,
+      [entityKey]: updated,
+      image: urlImagen,
+    });
+  } catch (err) {
+    await deleteFromR2(key);
+    return res.status(500).send({ ok: false, err });
+  }
+};
 
 let uploadFile = async (req: AuthenticatedRequest, res: Response) => {
   const id = asString(req.params.id);
@@ -14,120 +97,47 @@ let uploadFile = async (req: AuthenticatedRequest, res: Response) => {
   if (!req.files) {
     return res.status(400).send({
       ok: false,
-      err: { message: 'No se ha seleccionado ningún archivo' }
+      err: { message: 'No se ha seleccionado ningún archivo' },
     });
   }
 
-  const archivo = req.files.archivo as any;
+  const archivo = req.files.archivo as UploadedFile;
   const nombreSpliteado = archivo.name.split('.');
-  const extension = nombreSpliteado[nombreSpliteado.length - 1];
+  const extension = nombreSpliteado[nombreSpliteado.length - 1].toLowerCase();
 
-  const extensionesValidas = ['png', 'jpg', 'gif', 'jpeg'];
-  if (extensionesValidas.indexOf(extension) < 0) {
+  if (!EXTENSIONES_VALIDAS.includes(extension)) {
     return res.status(400).send({
       ok: false,
       err: {
-        message: 'Las extensiones permitidas son ' + extensionesValidas.join(', '),
-        ext: extension
-      }
+        message: 'Las extensiones permitidas son ' + EXTENSIONES_VALIDAS.join(', '),
+        ext: extension,
+      },
     });
   }
 
-  const nombreArchivo = `${id}-${new Date().getMilliseconds()}.${extension}`;
+  const nombreArchivo = `${id}-${Date.now()}.${extension}`;
+  const key = `${tipo}/${nombreArchivo}`;
+  const contentType = getContentType(extension);
 
-  await archivo.mv(`uploads/${tipo}/${nombreArchivo}`, (err: Error) => {
-    if (err) {
-      return res.status(500).send({ ok: false, err });
-    }
-  });
-
-  cloudinary.v2.uploader.upload(`uploads/${tipo}/${nombreArchivo}`, { tags: `${tipo}` }, async (err: any, image: any) => {
-    if (err) {
-      return res.status(500).send({ ok: false, err });
-    }
-
-    switch (tipo) {
-      case 'usuarios':
-        await imagenUsuario(id, res, nombreArchivo, image.url);
-        break;
-      case 'clubs':
-        await imagenClub(id, res, nombreArchivo, image.url);
-        break;
-    }
-  });
-};
-
-let imagenUsuario = async (id: string, res: Response, nombreArchivo: string, urlImagen: string) => {
   try {
-    const usuario = await prisma.user.findUnique({ where: { id } });
+    await uploadToR2(archivo.data, key, contentType);
+  } catch (err) {
+    return res.status(500).send({ ok: false, err });
+  }
 
-    if (!usuario) {
-      borrarArchivo(nombreArchivo);
+  const urlImagen = `${R2_PUBLIC_URL_PREFIX}/${key}`;
+
+  switch (tipo) {
+    case 'usuarios':
+      return await updateEntityImage(prisma.user, id, key, urlImagen, 'usuario', res);
+    case 'clubs':
+      return await updateEntityImage(prisma.club, id, key, urlImagen, 'club', res);
+    default:
+      await deleteFromR2(key);
       return res.status(400).send({
         ok: false,
-        err: { message: 'El usuario no existe' }
+        err: { message: 'Tipo no válido: ' + tipo },
       });
-    }
-
-    borrarArchivo(usuario.image || '');
-
-    const usuarioActualizado = await prisma.user.update({
-      where: { id },
-      data: { image: urlImagen }
-    });
-
-    res.status(200).send({
-      ok: true,
-      usuario: usuarioActualizado,
-      image: urlImagen
-    });
-  } catch (err) {
-    borrarArchivo(nombreArchivo);
-    res.status(500).send({ ok: false, err });
-  }
-};
-
-let imagenClub = async (id: string, res: Response, nombreArchivo: string, urlImagen: string) => {
-  try {
-    const club = await prisma.club.findUnique({ where: { id } });
-
-    if (!club) {
-      borrarArchivoClub(nombreArchivo);
-      return res.status(400).send({
-        ok: false,
-        err: { message: 'El club no existe' }
-      });
-    }
-
-    borrarArchivoClub(club.image || '');
-
-    const clubActualizado = await prisma.club.update({
-      where: { id },
-      data: { image: urlImagen }
-    });
-
-    res.status(200).send({
-      ok: true,
-      club: clubActualizado,
-      image: urlImagen
-    });
-  } catch (err) {
-    borrarArchivoClub(nombreArchivo);
-    res.status(500).send({ ok: false, err });
-  }
-};
-
-let borrarArchivo = (nombreImagen: string) => {
-  const pathUrlImage = path.resolve(__dirname, `../../uploads/usuarios/${nombreImagen}`);
-  if (fs.existsSync(pathUrlImage)) {
-    fs.unlinkSync(pathUrlImage);
-  }
-};
-
-let borrarArchivoClub = (nombreImagen: string) => {
-  const pathUrlImage = path.resolve(__dirname, `../../uploads/clubs/${nombreImagen}`);
-  if (fs.existsSync(pathUrlImage)) {
-    fs.unlinkSync(pathUrlImage);
   }
 };
 
