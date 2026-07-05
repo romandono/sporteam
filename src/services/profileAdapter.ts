@@ -83,6 +83,23 @@ function entrenadorResponse(profile: any): any {
   };
 }
 
+// ─── Zone resolver (accepts name|id) ────────────────────────────────────────
+
+async function resolveZonas(zonas: any[] | undefined): Promise<string[] | undefined> {
+  if (!zonas?.length) return undefined;
+
+  const ids: string[] = [];
+  for (const z of zonas) {
+    if (typeof z === 'string') {
+      ids.push(z);
+    } else if (z?.nombreZona) {
+      const zone = await prisma.zona.findUnique({ where: { nombreZona: z.nombreZona } });
+      if (zone) ids.push(zone.id);
+    }
+  }
+  return ids.length ? ids : undefined;
+}
+
 // ─── Jugador adapter functions (backward compat) ────────────────────────────
 
 export const getJugadores = async (desde = 0, limite = 5) => {
@@ -105,7 +122,7 @@ export const createJugador = async (data: any) => {
     role: data.role,
     estadoDeportivo: data.estadoDeportivo,
     clubId: data.clubId,
-    zonas: data.zonas,
+    zonas: await resolveZonas(data.zonas),
     nombreDeportivo: data.nombreDeportivo,
     fechaNacimiento: data.fechaNacimiento,
     lateralidad: data.lateralidad,
@@ -118,7 +135,9 @@ export const createJugador = async (data: any) => {
 
 export const updateJugador = async (id: string, body: any) => {
   const profile = await profileService.getProfileByUserId(id, ProfileType.JUGADOR);
-  const updated = await profileService.updateProfile(profile.id, body);
+  const updateData = { ...body };
+  if (body.zonas) updateData.zonas = await resolveZonas(body.zonas);
+  const updated = await profileService.updateProfile(profile.id, updateData);
   return jugadorResponse(updated);
 };
 
@@ -164,7 +183,7 @@ export const createEntrenador = async (data: any) => {
     role: data.role,
     estadoDeportivo: data.estadoDeportivo,
     clubId: data.clubId,
-    zonas: data.zonas,
+    zonas: await resolveZonas(data.zonas),
     nombreDeportivo: data.nombreDeportivo,
     entrenadorPorteros: data.entrenadorPorteros,
     titulacion: data.titulacion,
@@ -175,7 +194,9 @@ export const createEntrenador = async (data: any) => {
 
 export const updateEntrenador = async (id: string, body: any) => {
   const profile = await profileService.getProfileByUserId(id, ProfileType.ENTRENADOR);
-  const updated = await profileService.updateProfile(profile.id, body);
+  const updateData = { ...body };
+  if (body.zonas) updateData.zonas = await resolveZonas(body.zonas);
+  const updated = await profileService.updateProfile(profile.id, updateData);
   return entrenadorResponse(updated);
 };
 
