@@ -12,7 +12,7 @@ COPY tsconfig.json ./
 COPY src/ ./src/
 COPY scripts/ ./scripts/
 
-RUN npx prisma generate && npm run build
+RUN mkdir -p public && npx prisma generate && npm run build
 
 # Stage 2: Production
 FROM node:20-alpine AS production
