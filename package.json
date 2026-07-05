@@ -9,7 +9,7 @@
         "dev": "ts-node src/server.ts",
         "dev:watch": "ts-node-dev --respawn src/server.ts",
         "prisma:seed": "ts-node src/seed.ts",
-        "generate:api-docs": "ts-node --skip-project scripts/generate-openapi.ts",
+        "generate:api-docs": "node scripts/generate-openapi.js",
         "generate:api-types": "echo 'Usar: npx openapi-typescript public/openapi.json -o src/generated/api-types.ts'",
         "test": "jest --runInBand",
         "test:coverage": "jest --runInBand --coverage",
