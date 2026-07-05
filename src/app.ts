@@ -53,10 +53,21 @@ const publicPath = path.resolve(__dirname, '../public');
 app.use(express.static(publicPath));
 
 const openApiSpec = JSON.parse(fs.readFileSync(path.join(publicPath, 'openapi.json'), 'utf-8'));
-app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiSpec));
+
+function getOpenApiSpec(req: express.Request) {
+  const host = req.get('host') || 'localhost:3000';
+  const protocol = req.protocol || 'http';
+  const spec = { ...openApiSpec, servers: [{ url: `${protocol}://${host}`, description: 'Auto' }] };
+  return spec;
+}
+
+app.use('/api-docs', swaggerUi.serve, (req, res, next) => {
+  const spec = getOpenApiSpec(req);
+  swaggerUi.setup(spec)(req, res, next);
+});
 app.get('/api-docs.json', (req, res) => {
   res.setHeader('Content-Type', 'application/json');
-  res.send(openApiSpec);
+  res.send(getOpenApiSpec(req));
 });
 
 app.get('/health', (req, res) => {
