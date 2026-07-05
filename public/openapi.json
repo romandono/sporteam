@@ -1,0 +1,2225 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "Sporteam API",
+    "version": "2.0.0",
+    "description": "API RESTful para la gestión de jugadores, entrenadores y clubs de fútbol amateur",
+    "contact": {
+      "name": "Roman Dono Perez"
+    }
+  },
+  "servers": [
+    {
+      "url": "http://localhost:3000",
+      "description": "Desarrollo"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "TokenAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "token",
+        "description": "Token JWT de autenticación"
+      }
+    },
+    "schemas": {
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "ErrorResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean",
+            "example": false
+          },
+          "err": {
+            "oneOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "message": {
+                    "type": "string"
+                  }
+                }
+              }
+            ]
+          },
+          "message": {
+            "type": "string"
+          }
+        }
+      },
+      "User": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "apellidos": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ADMIN_ROLE",
+              "USER_ROLE",
+              "JUGADOR_ROLE",
+              "ENTRENADOR_ROLE",
+              "CLUB_ROLE"
+            ]
+          },
+          "estado": {
+            "type": "boolean"
+          },
+          "image": {
+            "type": "string",
+            "nullable": true
+          },
+          "google": {
+            "type": "boolean"
+          },
+          "estadoDeportivo": {
+            "type": "string",
+            "nullable": true
+          },
+          "clubId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateUserInput": {
+        "type": "object",
+        "required": [
+          "nombre",
+          "apellidos",
+          "email",
+          "password",
+          "role"
+        ],
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "apellidos": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "USER_ROLE",
+              "JUGADOR_ROLE",
+              "ENTRENADOR_ROLE",
+              "CLUB_ROLE"
+            ]
+          },
+          "estadoDeportivo": {
+            "type": "string"
+          },
+          "zona": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Array de IDs de zona"
+          },
+          "club": {
+            "type": "string",
+            "description": "ID del club"
+          }
+        }
+      },
+      "Jugador": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "apellidos": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "role": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string",
+            "nullable": true
+          },
+          "estadoDeportivo": {
+            "type": "string",
+            "nullable": true
+          },
+          "clubId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "jugador": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "nombreDeportivo": {
+                "type": "string",
+                "nullable": true
+              },
+              "fechaNacimiento": {
+                "type": "string",
+                "format": "date",
+                "nullable": true
+              },
+              "lateralidad": {
+                "type": "string",
+                "nullable": true
+              },
+              "demarcacion": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "altura": {
+                "type": "number",
+                "nullable": true
+              },
+              "peso": {
+                "type": "number",
+                "nullable": true
+              }
+            }
+          },
+          "estadisticas": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Estadistica"
+            }
+          }
+        }
+      },
+      "JugadorInput": {
+        "type": "object",
+        "required": [
+          "nombre",
+          "apellidos",
+          "email",
+          "password"
+        ],
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "apellidos": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "JUGADOR_ROLE"
+            ]
+          },
+          "estadoDeportivo": {
+            "type": "string"
+          },
+          "zona": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "club": {
+            "type": "string"
+          },
+          "nombreDeportivo": {
+            "type": "string"
+          },
+          "fechaNacimiento": {
+            "type": "string",
+            "format": "date"
+          },
+          "lateralidad": {
+            "type": "string",
+            "enum": [
+              "zurdo",
+              "diestro",
+              "ambidiestro"
+            ]
+          },
+          "demarcacion": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "altura": {
+            "type": "number"
+          },
+          "peso": {
+            "type": "number"
+          }
+        }
+      },
+      "Entrenador": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "apellidos": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "role": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string",
+            "nullable": true
+          },
+          "estadoDeportivo": {
+            "type": "string",
+            "nullable": true
+          },
+          "clubId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "entrenador": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "nombreDeportivo": {
+                "type": "string",
+                "nullable": true
+              },
+              "telefono": {
+                "type": "string",
+                "nullable": true
+              },
+              "entrenadorPorteros": {
+                "type": "boolean"
+              },
+              "titulacion": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "EntrenadorInput": {
+        "type": "object",
+        "required": [
+          "nombre",
+          "apellidos",
+          "email",
+          "password"
+        ],
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "apellidos": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 6
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "ENTRENADOR_ROLE"
+            ]
+          },
+          "estadoDeportivo": {
+            "type": "string"
+          },
+          "zona": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "club": {
+            "type": "string"
+          },
+          "nombreDeportivo": {
+            "type": "string"
+          },
+          "entrenadorPorteros": {
+            "type": "boolean"
+          },
+          "titulacion": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "telefono": {
+            "type": "string"
+          }
+        }
+      },
+      "Club": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          },
+          "localidad": {
+            "type": "string",
+            "nullable": true
+          },
+          "provinciaId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "modalidad": {
+            "type": "string",
+            "nullable": true
+          },
+          "image": {
+            "type": "string",
+            "nullable": true
+          },
+          "zonaId": {
+            "type": "string",
+            "format": "uuid",
+            "nullable": true
+          },
+          "provincia": {
+            "$ref": "#/components/schemas/Provincia"
+          },
+          "zona": {
+            "$ref": "#/components/schemas/Zona"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "CreateClubInput": {
+        "type": "object",
+        "required": [
+          "nombre"
+        ],
+        "properties": {
+          "nombre": {
+            "type": "string"
+          },
+          "localidad": {
+            "type": "string"
+          },
+          "provincia": {
+            "type": "string",
+            "description": "ID de la provincia"
+          },
+          "modalidad": {
+            "type": "string"
+          },
+          "image": {
+            "type": "string"
+          },
+          "zona": {
+            "type": "string",
+            "description": "ID de la zona"
+          }
+        }
+      },
+      "Zona": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombreZona": {
+            "type": "string"
+          }
+        }
+      },
+      "Provincia": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "nombre": {
+            "type": "string"
+          }
+        }
+      },
+      "Estadistica": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "profileId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "temporadaId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "partidosJugados": {
+            "type": "integer"
+          },
+          "goles": {
+            "type": "integer"
+          },
+          "asistencias": {
+            "type": "integer"
+          },
+          "tarjetasAmarillas": {
+            "type": "integer"
+          },
+          "tarjetasRojas": {
+            "type": "integer"
+          },
+          "temporada": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string",
+                "format": "uuid"
+              },
+              "anho": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      },
+      "LoginInput": {
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "password": {
+            "type": "string"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "token": {
+            "type": "string"
+          },
+          "usuario": {
+            "$ref": "#/components/schemas/User"
+          }
+        }
+      },
+      "PaginatedResponse": {
+        "type": "object",
+        "properties": {
+          "ok": {
+            "type": "boolean"
+          },
+          "total": {
+            "type": "integer"
+          }
+        }
+      }
+    }
+  },
+  "paths": {
+    "/api/clubs": {
+      "get": {
+        "tags": [
+          "Clubs"
+        ],
+        "summary": "Listar clubs con paginación",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "desde",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            },
+            "description": "Índice inicial"
+          },
+          {
+            "in": "query",
+            "name": "limite",
+            "schema": {
+              "type": "integer",
+              "default": 5
+            },
+            "description": "Máximo de resultados"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginada de clubs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "clubs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Club"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error al recuperar clubs"
+          }
+        }
+      }
+    },
+    "/api/clubs/{termino}": {
+      "get": {
+        "tags": [
+          "Clubs"
+        ],
+        "summary": "Buscar clubs por término",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "termino",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Término de búsqueda (nombre del club)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultados de búsqueda",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "resultados": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Club"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/club/{id}": {
+      "get": {
+        "tags": [
+          "Clubs"
+        ],
+        "summary": "Obtener club por ID",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Club encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "club": {
+                      "$ref": "#/components/schemas/Club"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Club no encontrado"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Clubs"
+        ],
+        "summary": "Actualizar un club",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateClubInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Club actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "club": {
+                      "$ref": "#/components/schemas/Club"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Club no encontrado"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Clubs"
+        ],
+        "summary": "Eliminar un club",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Club eliminado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Club no encontrado"
+          }
+        }
+      }
+    },
+    "/api/club": {
+      "post": {
+        "tags": [
+          "Clubs"
+        ],
+        "summary": "Crear un nuevo club",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateClubInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Club creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "club": {
+                      "$ref": "#/components/schemas/Club"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error de validación"
+          }
+        }
+      }
+    },
+    "/api/clubs/zona/{idZona}": {
+      "get": {
+        "tags": [
+          "Clubs"
+        ],
+        "summary": "Listar clubs por zona",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idZona",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "desde",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limite",
+            "schema": {
+              "type": "integer",
+              "default": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Clubs filtrados por zona",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "clubs": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Club"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/estadistica/{id}": {
+      "get": {
+        "tags": [
+          "Estadisticas"
+        ],
+        "summary": "Obtener estadísticas de un jugador por ID de perfil",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "ID del perfil (profileId) del jugador"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estadísticas del jugador",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "estadistica": {
+                      "$ref": "#/components/schemas/Estadistica"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error al recuperar estadísticas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/login": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Inicio de sesión",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token JWT generado"
+          },
+          "400": {
+            "description": "Credenciales incorrectas"
+          }
+        }
+      }
+    },
+    "/api/google": {
+      "post": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Inicio de sesión con Google",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "token": {
+                    "type": "string",
+                    "description": "Token de Google"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token JWT generado"
+          },
+          "403": {
+            "description": "Token de Google inválido"
+          }
+        }
+      }
+    },
+    "/api/login/renew": {
+      "get": {
+        "tags": [
+          "Auth"
+        ],
+        "summary": "Renovar token JWT",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Token renovado"
+          },
+          "401": {
+            "description": "No autorizado"
+          }
+        }
+      }
+    },
+    "/api/provincias": {
+      "get": {
+        "tags": [
+          "Provincias"
+        ],
+        "summary": "Listar todas las provincias",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de provincias",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "provincias": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Provincia"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error al recuperar provincias",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/upload/{tipo}/{id}": {
+      "put": {
+        "tags": [
+          "Upload"
+        ],
+        "summary": "Subir imagen de usuario o club",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "tipo",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "usuarios",
+                "clubs"
+              ]
+            },
+            "description": "Tipo de entidad (usuarios o clubs)"
+          },
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            },
+            "description": "ID de la entidad"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "archivo": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "Archivo de imagen (png, jpg, gif, jpeg)"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Imagen subida correctamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "image": {
+                      "type": "string"
+                    },
+                    "usuario": {
+                      "$ref": "#/components/schemas/User"
+                    },
+                    "club": {
+                      "$ref": "#/components/schemas/Club"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error de validación (extensión no válida, entidad no existe)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/zonas": {
+      "get": {
+        "tags": [
+          "Zonas"
+        ],
+        "summary": "Listar todas las zonas",
+        "responses": {
+          "200": {
+            "description": "Lista de zonas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "zonas": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Zona"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error al recuperar zonas",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/entrenadores": {
+      "get": {
+        "tags": [
+          "Entrenadores"
+        ],
+        "summary": "Listar entrenadores con paginación",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "desde",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limite",
+            "schema": {
+              "type": "integer",
+              "default": 20
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginada de entrenadores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "entrenadores": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Entrenador"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error al recuperar entrenadores"
+          }
+        }
+      }
+    },
+    "/api/entrenadores/{termino}": {
+      "get": {
+        "tags": [
+          "Entrenadores"
+        ],
+        "summary": "Buscar entrenadores por término",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "termino",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultados de búsqueda",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "resultados": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Entrenador"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/entrenador/{id}": {
+      "get": {
+        "tags": [
+          "Entrenadores"
+        ],
+        "summary": "Obtener entrenador por ID de usuario",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entrenador encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "entrenador": {
+                      "$ref": "#/components/schemas/Entrenador"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entrenador no encontrado"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Entrenadores"
+        ],
+        "summary": "Actualizar un entrenador",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombreDeportivo": {
+                    "type": "string"
+                  },
+                  "entrenadorPorteros": {
+                    "type": "boolean"
+                  },
+                  "titulacion": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "telefono": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Entrenador actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "entrenador": {
+                      "$ref": "#/components/schemas/Entrenador"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Entrenador no encontrado"
+          }
+        }
+      }
+    },
+    "/api/entrenador": {
+      "post": {
+        "tags": [
+          "Entrenadores"
+        ],
+        "summary": "Crear un nuevo entrenador (usuario + perfil)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/EntrenadorInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Entrenador creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "entrenador": {
+                      "$ref": "#/components/schemas/Entrenador"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error de validación"
+          }
+        }
+      }
+    },
+    "/api/entrenadores/zona/{idZona}": {
+      "get": {
+        "tags": [
+          "Entrenadores"
+        ],
+        "summary": "Listar entrenadores por zona",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idZona",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "desde",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limite",
+            "schema": {
+              "type": "integer",
+              "default": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Entrenadores filtrados por zona",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "entrenadores": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Entrenador"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/jugadores": {
+      "get": {
+        "tags": [
+          "Jugadores"
+        ],
+        "summary": "Listar jugadores con paginación",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "desde",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limite",
+            "schema": {
+              "type": "integer",
+              "default": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginada de jugadores",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "jugadores": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Jugador"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error al recuperar jugadores"
+          }
+        }
+      }
+    },
+    "/api/jugadores/{termino}": {
+      "get": {
+        "tags": [
+          "Jugadores"
+        ],
+        "summary": "Buscar jugadores por término",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "termino",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Término de búsqueda (nombre, apellidos, email)"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Resultados de búsqueda",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "resultados": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Jugador"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/jugador/{id}": {
+      "get": {
+        "tags": [
+          "Jugadores"
+        ],
+        "summary": "Obtener jugador por ID de usuario",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Jugador encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "jugador": {
+                      "$ref": "#/components/schemas/Jugador"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Jugador no encontrado"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Jugadores"
+        ],
+        "summary": "Actualizar un jugador",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "nombreDeportivo": {
+                    "type": "string"
+                  },
+                  "fechaNacimiento": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "lateralidad": {
+                    "type": "string"
+                  },
+                  "demarcacion": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "altura": {
+                    "type": "number"
+                  },
+                  "peso": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Jugador actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "jugador": {
+                      "$ref": "#/components/schemas/Jugador"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Jugador no encontrado"
+          }
+        }
+      }
+    },
+    "/api/jugador": {
+      "post": {
+        "tags": [
+          "Jugadores"
+        ],
+        "summary": "Crear un nuevo jugador (usuario + perfil)",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/JugadorInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Jugador creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "jugador": {
+                      "$ref": "#/components/schemas/Jugador"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error de validación"
+          }
+        }
+      }
+    },
+    "/api/jugadores/zona/{idZona}": {
+      "get": {
+        "tags": [
+          "Jugadores"
+        ],
+        "summary": "Listar jugadores por zona",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "idZona",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "in": "query",
+            "name": "desde",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limite",
+            "schema": {
+              "type": "integer",
+              "default": 5
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Jugadores filtrados por zona",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "jugadores": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Jugador"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/usuarios": {
+      "get": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Listar usuarios con paginación",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "query",
+            "name": "desde",
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "in": "query",
+            "name": "limite",
+            "schema": {
+              "type": "integer",
+              "default": 9
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista paginada de usuarios",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "total": {
+                      "type": "integer"
+                    },
+                    "usuarios": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/User"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error al recuperar usuarios"
+          }
+        }
+      }
+    },
+    "/api/usuario/{id}": {
+      "get": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Obtener usuario por ID",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuario encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "usuario": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Actualizar un usuario",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuario actualizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "usuario": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuario no encontrado"
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Eliminar un usuario",
+        "security": [
+          {
+            "TokenAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "in": "path",
+            "name": "id",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuario eliminado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Usuario eliminado"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Usuario no encontrado"
+          }
+        }
+      }
+    },
+    "/api/usuario": {
+      "post": {
+        "tags": [
+          "Usuarios"
+        ],
+        "summary": "Crear un nuevo usuario",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuario creado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "ok": {
+                      "type": "boolean"
+                    },
+                    "usuario": {
+                      "$ref": "#/components/schemas/User"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Error de validación"
+          }
+        }
+      }
+    }
+  },
+  "tags": []
+}

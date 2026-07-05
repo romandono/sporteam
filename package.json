@@ -4,16 +4,22 @@
     "description": "Sporteam API - Red social de fútbol para equipos amateur",
     "main": "dist/server.js",
     "scripts": {
-        "build": "tsc",
+        "build": "tsc && npm run generate:api-docs",
         "start": "node dist/server.js",
         "dev": "ts-node src/server.ts",
         "dev:watch": "ts-node-dev --respawn src/server.ts",
+        "prisma:seed": "ts-node src/seed.ts",
+        "generate:api-docs": "ts-node --skip-project scripts/generate-openapi.ts",
+        "generate:api-types": "echo 'Usar: npx openapi-typescript public/openapi.json -o src/generated/api-types.ts'",
         "test": "jest --runInBand",
         "test:coverage": "jest --runInBand --coverage",
         "test:watch": "jest --runInBand --watch",
         "lint": "eslint src/",
         "lint:fix": "eslint src/ --fix",
         "format": "prettier --write src/"
+    },
+    "prisma": {
+        "seed": "ts-node src/seed.ts"
     },
     "repository": {
         "type": "git",
